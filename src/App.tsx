@@ -4,47 +4,13 @@ import Notes from "./components/Notes";
 import { Note } from "./types";
 import { useDebouncedEffect } from "./hooks/useDebouncedEffect";
 import { getLocalStorageItem, setLocalStorageItem } from "./utils/localStorage";
-
-const initialNotes: Note[] = [
-  {
-    _id: "ROOT",
-    text: "I am Groot!",
-    childrenIds: ["2", "3", "5"],
-  },
-  {
-    _id: "1",
-    text: "Hello World",
-    childrenIds: [],
-  },
-  {
-    _id: "2",
-    text: "This is a note",
-    childrenIds: [],
-  },
-  {
-    _id: "3",
-    text: "This is another note",
-    childrenIds: ["4"],
-  },
-  {
-    _id: "4",
-    text: "This is another note",
-    childrenIds: [],
-  },
-  {
-    _id: "5",
-    text: "This is another note what???",
-    childrenIds: [],
-  },
-];
+import { initialNotes } from "./initialNotes";
 
 export default function App() {
   const [notes, setNotes] = useState(
     () => getLocalStorageItem<Note[]>("notes") ?? initialNotes
   );
-  const rootNote = getNote(notes, "ROOT");
 
-  // save notes to localstorage
   useDebouncedEffect(
     () => {
       setLocalStorageItem("notes", notes);
@@ -53,6 +19,8 @@ export default function App() {
     500,
     [notes]
   );
+
+  const rootNote = getNote(notes, "ROOT");
 
   return (
     <>

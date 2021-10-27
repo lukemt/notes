@@ -4,9 +4,9 @@ export function getLocalStorageItem<T>(key: string): T | null {
     if (loadedItem) {
       return JSON.parse(loadedItem) as T;
     }
+    return null;
   } catch (e) {
     console.error(e);
-  } finally {
     return null;
   }
 }
