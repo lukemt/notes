@@ -1,5 +1,5 @@
 import { useState } from "react";
-import Notes from "./Notes";
+import Notes from "./components/Notes";
 import { Note } from "./types";
 
 const initialNotes: Note[] = [
@@ -44,18 +44,20 @@ export default function App() {
       <header className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md">
         <h1>Hello World</h1>
       </header>
-      <main className="max-w-sm mx-auto my-20">
-        {rootNote.childrenIds.map((id) => (
-          <Notes
-            key={id}
-            notes={notes}
-            id={id}
-            onUpdateNote={updateNote}
-            onAddNote={addNote}
-            onDeleteNote={deleteNote}
-            onFocusTriggered={removeNeedsFocus}
-          />
-        ))}
+      <main className="max-w-md mx-auto my-20">
+        <ul>
+          {rootNote.childrenIds.map((id) => (
+            <Notes
+              key={id}
+              notes={notes}
+              id={id}
+              onUpdateNote={updateNote}
+              onAddNote={addNote}
+              onDeleteNote={deleteNote}
+              onFocusTriggered={removeNeedsFocus}
+            />
+          ))}
+        </ul>
       </main>
       <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl">
         foo
