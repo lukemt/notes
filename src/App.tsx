@@ -1,29 +1,19 @@
 import { nanoid } from "nanoid";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Notes from "./components/Notes";
-import { Note } from "./types";
-import { useDebouncedEffect } from "./hooks/useDebouncedEffect";
-import { getLocalStorageItem, setLocalStorageItem } from "./utils/localStorage";
-import { initialNotes } from "./initialNotes";
 import {
   getNote,
   getParentNote,
   getPreviousVisibleNoteId,
 } from "./noteModel/getters";
+import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
-  const [notes, setNotes] = useState(
-    () => getLocalStorageItem<Note[]>("notes") ?? initialNotes
-  );
+  const [notes, setNotes] = useState(() => loadNotes());
 
-  useDebouncedEffect(
-    () => {
-      setLocalStorageItem("notes", notes);
-      console.log("Saved notes to localstorage");
-    },
-    500,
-    [notes]
-  );
+  useEffect(() => {
+    saveNotes(notes);
+  }, [notes]);
 
   const rootNote = getNote(notes, "ROOT");
 
