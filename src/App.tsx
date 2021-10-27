@@ -1,3 +1,4 @@
+import { nanoid } from "nanoid";
 import { useState } from "react";
 import Notes from "./components/Notes";
 import { Note } from "./types";
@@ -80,7 +81,7 @@ export default function App() {
 
   function addNote(sponsoringNoteId: string) {
     const sponsoringNote = getNote(notes, sponsoringNoteId);
-    const newId = String(Math.random());
+    const newId = nanoid();
 
     setNotes(
       // add an empty note to the collection
