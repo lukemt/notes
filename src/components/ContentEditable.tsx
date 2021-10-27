@@ -107,7 +107,6 @@ export default function ContentEditable({
         defaultValue: defaultValue,
       });
     setIsFocus(false);
-    // setValue(defaultValue);
   }
 }
 
