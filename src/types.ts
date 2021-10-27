@@ -1,5 +1,6 @@
 export interface Note {
   _id: string;
   text: string;
-  children: string[];
+  childrenIds: string[];
+  needsFocus?: true;
 }

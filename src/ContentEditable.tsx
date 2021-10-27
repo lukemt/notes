@@ -2,11 +2,23 @@ import { useEffect, useRef, useState } from "react";
 
 interface ContentEditableProps {
   defaultValue: string;
+  needsFocus?: boolean;
   onNewValue: (value: string) => void;
+  onEnter: () => void;
+  onDelete: () => void;
+  onFocusTriggered: () => void;
   className?: string;
 }
 
-export default function ContentEditable(props: ContentEditableProps) {
+export default function ContentEditable({
+  defaultValue,
+  needsFocus,
+  onNewValue,
+  onEnter,
+  onDelete,
+  onFocusTriggered,
+  className,
+}: ContentEditableProps) {
   const [isFocus, setIsFocus] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
@@ -16,41 +28,74 @@ export default function ContentEditable(props: ContentEditableProps) {
 
   useEffect(() => {
     if (!isFocus) {
-      setValue(props.defaultValue);
+      setValue(defaultValue);
     }
-  }, [isFocus, props.defaultValue]);
+  }, [isFocus, defaultValue]);
+
+  // needs focus
+  useEffect(() => {
+    if (!isFocus && needsFocus) {
+      if (ref.current) {
+        ref.current.focus();
+        setCaretToEnd(ref.current);
+        onFocusTriggered();
+      }
+    }
+  }, [needsFocus, isFocus, onFocusTriggered]);
 
   return (
     <div
-      className={props.className}
+      className={className}
       contentEditable={true}
       spellCheck={true}
       ref={ref}
       onInput={handleInput}
       onBlur={handleBlur}
       onFocus={handleFocus}
+      onKeyDown={handleKeyDown}
     />
   );
 
   function handleInput(e: React.FormEvent<HTMLDivElement>) {
-    console.log("ContentEditable: onInput");
     const div = e.target as HTMLDivElement;
-    props.onNewValue(div.textContent ?? "");
+    onNewValue(div.textContent ?? "");
+  }
+
+  function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
+    if (e.key === "Enter") {
+      onEnter();
+      e.preventDefault();
+    }
+    if (e.key === "Backspace" && ref.current?.textContent === "") {
+      onDelete();
+    }
+  }
+
+  function handleFocus(e: React.FormEvent<HTMLDivElement>) {
+    setIsFocus(true);
   }
 
   function handleBlur(e: React.FormEvent<HTMLDivElement>) {
     console.log("ContentEditable: onBlur: replacing with defaultValue");
     const div = e.target as HTMLDivElement;
-    if ((div.textContent ?? "") !== props.defaultValue)
+    if ((div.textContent ?? "") !== defaultValue)
       console.error("A ContentEditable seems to be wrongly updated", {
         divContent: div.textContent ?? "",
-        defaultValue: props.defaultValue,
+        defaultValue: defaultValue,
       });
     setIsFocus(false);
-    // setValue(props.defaultValue);
+    // setValue(defaultValue);
   }
+}
 
-  function handleFocus(e: React.FormEvent<HTMLDivElement>) {
-    setIsFocus(true);
+function setCaretToEnd(contentEditableElement: HTMLDivElement) {
+  // Found on StackOverflow
+  const range = document.createRange(); // Create a range (a range is a like the selection but invisible)
+  range.selectNodeContents(contentEditableElement); // Select the entire contents of the element with the range
+  range.collapse(false); // Collapse the range to the end point. false means collapse to end rather than the start
+  const selection = window.getSelection(); // Get the selection object (allows you to change selection)
+  if (selection) {
+    selection.removeAllRanges(); // Remove any selections already made
+    selection.addRange(range); // Make the range you have just created the visible selection
   }
 }
