@@ -8,6 +8,8 @@ interface NoteProps {
   onAddNote: (id: string) => void;
   onDeleteNote: (id: string) => void;
   onFocusTriggered: (id: string) => void;
+  onIndentNote: (id: string) => void;
+  onOutdentNote: (id: string) => void;
 }
 
 export default function Notes({
@@ -17,6 +19,8 @@ export default function Notes({
   onAddNote,
   onDeleteNote,
   onFocusTriggered,
+  onIndentNote,
+  onOutdentNote,
 }: NoteProps) {
   const note = getNote(notes, id);
   if (!note) {
@@ -34,6 +38,8 @@ export default function Notes({
         onEnter={() => onAddNote(note._id)}
         onDelete={() => onDeleteNote(note._id)}
         onFocusTriggered={() => onFocusTriggered(note._id)}
+        onIndent={() => onIndentNote(note._id)}
+        onOutdent={() => onOutdentNote(note._id)}
       />
       <ul className="pl-10">
         {note.childrenIds.map((childId) => (
@@ -45,6 +51,8 @@ export default function Notes({
             onAddNote={onAddNote}
             onDeleteNote={onDeleteNote}
             onFocusTriggered={onFocusTriggered}
+            onIndentNote={onIndentNote}
+            onOutdentNote={onOutdentNote}
           />
         ))}
       </ul>

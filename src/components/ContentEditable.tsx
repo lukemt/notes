@@ -7,6 +7,8 @@ interface ContentEditableProps {
   onEnter: () => void;
   onDelete: () => void;
   onFocusTriggered: () => void;
+  onIndent: () => void;
+  onOutdent: () => void;
   className?: string;
 }
 
@@ -17,6 +19,8 @@ export default function ContentEditable({
   onEnter,
   onDelete,
   onFocusTriggered,
+  onIndent,
+  onOutdent,
   className,
 }: ContentEditableProps) {
   const [isFocus, setIsFocus] = useState(false);
@@ -62,12 +66,31 @@ export default function ContentEditable({
   }
 
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
-    if (e.key === "Enter") {
-      onEnter();
-      e.preventDefault();
-    }
-    if (e.key === "Backspace" && ref.current?.textContent === "") {
-      onDelete();
+    switch (e.key) {
+      case "Enter": {
+        onEnter();
+        e.preventDefault();
+        break;
+      }
+
+      case "Backspace": {
+        if (ref.current?.textContent === "") {
+          onDelete();
+        }
+        break;
+      }
+
+      case "Tab": {
+        if (e.shiftKey) {
+          onOutdent();
+          e.preventDefault();
+        } else {
+          onIndent();
+          e.preventDefault();
+        }
+
+        break;
+      }
     }
   }
 

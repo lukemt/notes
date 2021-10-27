@@ -55,6 +55,8 @@ export default function App() {
               onAddNote={addNote}
               onDeleteNote={deleteNote}
               onFocusTriggered={removeNeedsFocus}
+              onIndentNote={indentNote}
+              onOutdentNote={outdentNote}
             />
           ))}
         </ul>
@@ -176,7 +178,92 @@ export default function App() {
       })
     );
   }
+
+  function indentNote(id: string) {
+    console.log("indent note", id);
+    const parentNote = getParentNote(notes, id);
+
+    // get the index of the note in the children array of the parent
+    const index = parentNote.childrenIds.indexOf(id);
+
+    // if the note is the first child, do nothing
+    if (index === 0) {
+      return;
+    }
+
+    // get the previous note
+    const previousNoteId = parentNote.childrenIds[index - 1];
+
+    setNotes(
+      notes.map((note) => {
+        if (note._id === parentNote._id) {
+          // remove the note from the children array of the parent
+          return {
+            ...note,
+            childrenIds: note.childrenIds.filter((childId) => childId !== id),
+          };
+        } else if (note._id === previousNoteId) {
+          // add the note to the children array of the previous note
+          return {
+            ...note,
+            childrenIds: [...note.childrenIds, id],
+          };
+        } else if (note._id === id) {
+          // set needsFocus to true
+          return {
+            ...note,
+            needsFocus: true,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
+  }
+  function outdentNote(id: string) {
+    console.log("outdent note", id);
+    const parentNote = getParentNote(notes, id);
+    if (parentNote._id === "ROOT") {
+      return;
+    }
+    const grandParentNote = getParentNote(notes, parentNote._id);
+
+    // get index of the parent note in the children array of the grandparent
+    const index = grandParentNote.childrenIds.indexOf(parentNote._id);
+
+    // insert the note in the children array of the grandparent
+    setNotes(
+      notes.map((note) => {
+        if (note._id === grandParentNote._id) {
+          return {
+            ...note,
+            childrenIds: [
+              ...note.childrenIds.slice(0, index + 1),
+              id,
+              ...note.childrenIds.slice(index + 1),
+            ],
+          };
+        } else if (note._id === parentNote._id) {
+          return {
+            ...note,
+            childrenIds: note.childrenIds.filter((childId) => childId !== id),
+          };
+        } else if (note._id === id) {
+          return {
+            ...note,
+            needsFocus: true,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
+  }
 }
+
+////////////////////////////////////////////////////////////////////////////////
+// Getter helper functions
+////////////////////////////////////////////////////////////////////////////////
 
 function getLastVisibleChild(notes: Note[], id: string): string {
   const note = getNote(notes, id);
