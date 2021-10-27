@@ -1,7 +1,9 @@
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
+import ContentEditable from "./components/ContentEditable";
 import Notes from "./components/Notes";
 import {
+  getNextVisibleNoteId,
   getNote,
   getParentNote,
   getPreviousVisibleNoteId,
@@ -19,8 +21,20 @@ export default function App() {
 
   return (
     <>
-      <header className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md">
-        <h1>Hello World</h1>
+      <header>
+        <ContentEditable
+          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md"
+          defaultValue={rootNote.text}
+          needsFocus={false}
+          onNewValue={(value) => updateNote(rootNote._id, value)}
+          onEnter={() => {}}
+          onDelete={() => {}}
+          onFocusTriggered={() => {}}
+          onIndent={() => {}}
+          onOutdent={() => {}}
+          onSelectPrevious={() => {}}
+          onSelectNext={() => {}}
+        />
       </header>
       <main className="max-w-md mx-auto my-20">
         <ul>
@@ -35,6 +49,8 @@ export default function App() {
               onFocusTriggered={removeNeedsFocus}
               onIndentNote={indentNote}
               onOutdentNote={outdentNote}
+              onSelectPreviousNote={selectPrevious}
+              onSelectNextNote={selectNext}
             />
           ))}
         </ul>
@@ -109,6 +125,11 @@ export default function App() {
 
     // Don't delete the last note
     if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
+      return;
+    }
+
+    // Don't delete if the note has children
+    if (getNote(notes, id).childrenIds.length) {
       return;
     }
 
@@ -236,5 +257,42 @@ export default function App() {
         }
       })
     );
+  }
+
+  function selectNext(id: string) {
+    const nextNoteId = getNextVisibleNoteId(notes, id);
+    if (nextNoteId) {
+      setNotes(
+        notes.map((note) => {
+          if (note._id === nextNoteId) {
+            return {
+              ...note,
+              needsFocus: true,
+            };
+          } else {
+            return note;
+          }
+        })
+      );
+    }
+  }
+
+  function selectPrevious(id: string) {
+    const previousNoteId = getPreviousVisibleNoteId(notes, id);
+
+    if (previousNoteId) {
+      setNotes(
+        notes.map((note) => {
+          if (note._id === previousNoteId) {
+            return {
+              ...note,
+              needsFocus: true,
+            };
+          } else {
+            return note;
+          }
+        })
+      );
+    }
   }
 }

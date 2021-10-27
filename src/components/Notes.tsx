@@ -11,6 +11,8 @@ interface NoteProps {
   onFocusTriggered: (id: string) => void;
   onIndentNote: (id: string) => void;
   onOutdentNote: (id: string) => void;
+  onSelectPreviousNote: (id: string) => void;
+  onSelectNextNote: (id: string) => void;
 }
 
 export default function Notes({
@@ -22,6 +24,8 @@ export default function Notes({
   onFocusTriggered,
   onIndentNote,
   onOutdentNote,
+  onSelectPreviousNote,
+  onSelectNextNote,
 }: NoteProps) {
   const note = getNote(notes, id);
   if (!note) {
@@ -41,6 +45,8 @@ export default function Notes({
         onFocusTriggered={() => onFocusTriggered(note._id)}
         onIndent={() => onIndentNote(note._id)}
         onOutdent={() => onOutdentNote(note._id)}
+        onSelectPrevious={() => onSelectPreviousNote(note._id)}
+        onSelectNext={() => onSelectNextNote(note._id)}
       />
       <ul className="pl-10">
         {note.childrenIds.map((childId) => (
@@ -54,6 +60,8 @@ export default function Notes({
             onFocusTriggered={onFocusTriggered}
             onIndentNote={onIndentNote}
             onOutdentNote={onOutdentNote}
+            onSelectPreviousNote={onSelectPreviousNote}
+            onSelectNextNote={onSelectNextNote}
           />
         ))}
       </ul>

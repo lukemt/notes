@@ -54,3 +54,34 @@ export function getPreviousVisibleNoteId(notes: Note[], id: string): string {
     return getLastVisibleChild(notes, previousSilblingId);
   }
 }
+
+export function getNextSilblingId(notes: Note[], id: string): string | null {
+  // find parent note
+  const parentNote = getParentNote(notes, id);
+  // find index of the current note in the children array
+  const index = parentNote.childrenIds.indexOf(id);
+  if (index === parentNote.childrenIds.length - 1) {
+    if (parentNote._id === "ROOT") {
+      return null;
+    } else {
+      return getNextSilblingId(notes, parentNote._id);
+    }
+  } else {
+    return parentNote.childrenIds[index + 1];
+  }
+}
+
+export function getNextVisibleNoteId(notes: Note[], id: string): string {
+  const note = getNote(notes, id);
+  if (note.childrenIds.length > 0) {
+    const firstChild = note.childrenIds[0];
+    return firstChild;
+  } else {
+    const nextSilblingId = getNextSilblingId(notes, id);
+    if (nextSilblingId) {
+      return nextSilblingId;
+    } else {
+      return id;
+    }
+  }
+}

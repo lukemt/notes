@@ -2,6 +2,7 @@ import { useEffect, useRef, useState } from "react";
 
 interface ContentEditableProps {
   defaultValue: string;
+  className?: string;
   needsFocus?: boolean;
   onNewValue: (value: string) => void;
   onEnter: () => void;
@@ -9,7 +10,8 @@ interface ContentEditableProps {
   onFocusTriggered: () => void;
   onIndent: () => void;
   onOutdent: () => void;
-  className?: string;
+  onSelectPrevious: () => void;
+  onSelectNext: () => void;
 }
 
 export default function ContentEditable({
@@ -21,6 +23,8 @@ export default function ContentEditable({
   onFocusTriggered,
   onIndent,
   onOutdent,
+  onSelectPrevious,
+  onSelectNext,
   className,
 }: ContentEditableProps) {
   const [isFocus, setIsFocus] = useState(false);
@@ -88,7 +92,34 @@ export default function ContentEditable({
           onIndent();
           e.preventDefault();
         }
+        break;
+      }
 
+      case "ArrowUp": {
+        // check if curet is at the beginning of the line
+        // const selection = window.getSelection();
+        // if (selection) {
+        //   const range = selection.getRangeAt(0);
+        //   const start = range.startOffset;
+        //   if (start === 0) {
+        //     onSelectPrevious();
+        //   }
+        // }
+        onSelectPrevious();
+        break;
+      }
+
+      case "ArrowDown": {
+        // check if curet is at the end of the line
+        // const selection = window.getSelection();
+        // if (selection) {
+        //   const range = selection.getRangeAt(0);
+        //   const end = range.endOffset;
+        //   if (end === ref.current?.textContent?.length) {
+        //     onSelectNext();
+        //   }
+        // }
+        onSelectNext();
         break;
       }
     }
