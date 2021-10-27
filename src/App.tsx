@@ -5,6 +5,11 @@ import { Note } from "./types";
 import { useDebouncedEffect } from "./hooks/useDebouncedEffect";
 import { getLocalStorageItem, setLocalStorageItem } from "./utils/localStorage";
 import { initialNotes } from "./initialNotes";
+import {
+  getNote,
+  getParentNote,
+  getPreviousVisibleNoteId,
+} from "./noteModel/getters";
 
 export default function App() {
   const [notes, setNotes] = useState(
@@ -242,63 +247,4 @@ export default function App() {
       })
     );
   }
-}
-
-////////////////////////////////////////////////////////////////////////////////
-// Getter helper functions
-////////////////////////////////////////////////////////////////////////////////
-
-function getLastVisibleChild(notes: Note[], id: string): string {
-  const note = getNote(notes, id);
-  if (note.childrenIds.length > 0) {
-    const lastChild = note.childrenIds[note.childrenIds.length - 1];
-    // recursively get the last visible child of the last visible child
-    return getLastVisibleChild(notes, lastChild);
-  } else {
-    return note._id;
-  }
-}
-
-function getPreviousVisibleNoteId(notes: Note[], id: string): string {
-  const { previousSilblingId, previousSilblingIsParent } =
-    getPreviousSilblingId(notes, id);
-  if (previousSilblingIsParent) {
-    return previousSilblingId;
-  } else {
-    return getLastVisibleChild(notes, previousSilblingId);
-  }
-}
-
-function getPreviousSilblingId(notes: Note[], id: string) {
-  // find parent note
-  const parentNote = getParentNote(notes, id);
-  // find index of the current note in the children array
-  const index = parentNote.childrenIds.indexOf(id);
-  if (index === 0) {
-    return {
-      previousSilblingIsParent: true,
-      previousSilblingId: parentNote._id,
-    };
-  } else {
-    return {
-      previousSilblingIsParent: false,
-      previousSilblingId: parentNote.childrenIds[index - 1],
-    };
-  }
-}
-
-function getParentNote(notes: Note[], id: string): Note {
-  const parentNote = notes.find((note) => note.childrenIds.includes(id));
-  if (!parentNote) {
-    throw new Error("Could not find note");
-  }
-  return parentNote;
-}
-
-function getNote(notes: Note[], id: string): Note {
-  const note = notes.find((note) => note._id === id);
-  if (!note) {
-    throw new Error("Could not find note");
-  }
-  return note;
 }

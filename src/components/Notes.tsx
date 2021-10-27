@@ -1,3 +1,4 @@
+import { getNote } from "../noteModel/getters";
 import { Note } from "../types";
 import ContentEditable from "./ContentEditable";
 
@@ -58,8 +59,4 @@ export default function Notes({
       </ul>
     </li>
   );
-}
-
-function getNote(notes: Note[], id: string) {
-  return notes.find((note) => note._id === id);
 }
