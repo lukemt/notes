@@ -23,7 +23,7 @@ export default function App() {
     <>
       <header>
         <ContentEditable
-          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md"
+          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md dark:from-gray-900 dark:to-blue-900"
           defaultValue={rootNote.text}
           needsFocus={false}
           onNewValue={(value) => updateNote(rootNote._id, value)}
@@ -55,7 +55,7 @@ export default function App() {
           ))}
         </ul>
       </main>
-      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl">
+      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl dark:from-gray-900 dark:to-green-900">
         foo
       </footer>
     </>
