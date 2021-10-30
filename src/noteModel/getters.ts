@@ -1,4 +1,4 @@
-import { Note } from "../types";
+import { Note } from "./types";
 
 export function getNote(notes: Note[], id: string): Note {
   const note = notes.find((note) => note._id === id);

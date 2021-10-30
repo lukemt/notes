@@ -1,5 +1,5 @@
 import { getNote } from "../noteModel/getters";
-import { Note } from "../types";
+import { Note } from "../noteModel/types";
 import ContentEditable from "./ContentEditable";
 
 interface NoteProps {
@@ -30,6 +30,10 @@ export default function Notes({
   const note = getNote(notes, id);
   if (!note) {
     console.error("Note not found", id);
+    return null;
+  }
+
+  if (!note.expanded) {
     return null;
   }
 
