@@ -34,6 +34,8 @@ export default function App() {
           onOutdent={() => {}}
           onSelectPrevious={() => {}}
           onSelectNext={() => {}}
+          onExpand={() => {}}
+          onCollapse={() => {}}
         />
       </header>
       <main className="max-w-md mx-auto my-20">
@@ -51,6 +53,8 @@ export default function App() {
               onOutdentNote={outdentNote}
               onSelectPreviousNote={selectPrevious}
               onSelectNextNote={selectNext}
+              onExpandNote={expandNote}
+              onCollapseNote={collapseNote}
             />
           ))}
         </ul>
@@ -84,6 +88,7 @@ export default function App() {
           _id: newId,
           text: "",
           childrenIds: [],
+          isExpanded: true,
           needsFocus: true as true,
         },
       ]
@@ -294,5 +299,35 @@ export default function App() {
         })
       );
     }
+  }
+
+  function expandNote(id: string) {
+    setNotes(
+      notes.map((note) => {
+        if (note._id === id) {
+          return {
+            ...note,
+            isExpanded: true,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
+  }
+
+  function collapseNote(id: string) {
+    setNotes(
+      notes.map((note) => {
+        if (note._id === id) {
+          return {
+            ...note,
+            isExpanded: false,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
   }
 }
