@@ -54,6 +54,7 @@ export default function ContentEditable({
   return (
     <div
       className={className}
+      style={{ whiteSpace: "pre-line" }}
       contentEditable={true}
       spellCheck={true}
       ref={ref}
@@ -72,8 +73,10 @@ export default function ContentEditable({
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     switch (e.key) {
       case "Enter": {
-        onEnter();
-        e.preventDefault();
+        if (!e.shiftKey) {
+          onEnter();
+          e.preventDefault();
+        }
         break;
       }
 
