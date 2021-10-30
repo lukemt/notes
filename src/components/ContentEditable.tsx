@@ -14,6 +14,8 @@ interface ContentEditableProps {
   onSelectNext: () => void;
   onExpand: () => void;
   onCollapse: () => void;
+  onMoveUp: () => void;
+  onMoveDown: () => void;
 }
 
 export default function ContentEditable({
@@ -29,6 +31,8 @@ export default function ContentEditable({
   onSelectNext,
   onExpand,
   onCollapse,
+  onMoveUp,
+  onMoveDown,
   className,
 }: ContentEditableProps) {
   const [isFocus, setIsFocus] = useState(false);
@@ -46,7 +50,7 @@ export default function ContentEditable({
 
   // needs focus
   useEffect(() => {
-    if (!isFocus && needsFocus) {
+    if (needsFocus) {
       if (ref.current) {
         ref.current.focus();
         setCaretToEnd(ref.current);
@@ -114,6 +118,8 @@ export default function ContentEditable({
         // }
         if (e.ctrlKey || e.metaKey) {
           onCollapse();
+        } else if (e.altKey) {
+          onMoveUp();
         } else {
           onSelectPrevious();
         }
@@ -132,6 +138,8 @@ export default function ContentEditable({
         // }
         if (e.ctrlKey || e.metaKey) {
           onExpand();
+        } else if (e.altKey) {
+          onMoveDown();
         } else {
           onSelectNext();
         }

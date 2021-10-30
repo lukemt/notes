@@ -3,6 +3,7 @@ import { useEffect, useState } from "react";
 import ContentEditable from "./components/ContentEditable";
 import Notes from "./components/Notes";
 import {
+  getNextSilblingId,
   getNextVisibleNoteId,
   getNote,
   getParentNote,
@@ -36,6 +37,8 @@ export default function App() {
           onSelectNext={() => {}}
           onExpand={() => {}}
           onCollapse={() => {}}
+          onMoveUp={() => {}}
+          onMoveDown={() => {}}
         />
       </header>
       <main className="max-w-md mx-auto my-20">
@@ -55,6 +58,8 @@ export default function App() {
               onSelectNextNote={selectNext}
               onExpandNote={expandNote}
               onCollapseNote={collapseNote}
+              onMoveUpNote={moveUpNote}
+              onMoveDownNote={moveDownNote}
             />
           ))}
         </ul>
@@ -331,6 +336,105 @@ export default function App() {
         } else {
           return note;
         }
+      })
+    );
+  }
+
+  function moveUpNote(id: string) {
+    const parentNote = getParentNote(notes, id);
+    const previousNoteId = getPreviousVisibleNoteId(notes, id);
+    if (previousNoteId === "ROOT") {
+      return;
+    }
+    const parentOfPreviousNote = getParentNote(notes, previousNoteId);
+
+    setNotes(
+      notes.map((originalNote) => {
+        let note = originalNote;
+        if (note._id === id) {
+          note = {
+            ...note,
+            needsFocus: true,
+          };
+        }
+
+        if (note._id === parentNote._id) {
+          note = {
+            ...note,
+            childrenIds: [
+              ...note.childrenIds.filter((childId) => childId !== id),
+            ],
+          };
+        }
+
+        if (note._id === parentOfPreviousNote._id) {
+          // insert before previous note
+          const index = note.childrenIds.indexOf(previousNoteId);
+          note = {
+            ...note,
+            childrenIds: [
+              ...note.childrenIds.slice(0, index),
+              id,
+              ...note.childrenIds.slice(index),
+            ],
+          };
+        }
+
+        return note;
+      })
+    );
+  }
+
+  function moveDownNote(id: string) {
+    const parentNote = getParentNote(notes, id);
+    const nextNoteId = getNextSilblingId(notes, id);
+    if (!nextNoteId) {
+      return;
+    }
+    const nextNote = getNote(notes, nextNoteId);
+    const parentOfNextNote = getParentNote(notes, nextNoteId);
+
+    setNotes(
+      notes.map((originalNote) => {
+        let note = originalNote;
+        if (note._id === id) {
+          note = {
+            ...note,
+            needsFocus: true,
+          };
+        }
+
+        if (note._id === parentNote._id) {
+          note = {
+            ...note,
+            childrenIds: [
+              ...note.childrenIds.filter((childId) => childId !== id),
+            ],
+          };
+        }
+
+        if (nextNote.isExpanded && nextNote.childrenIds.length > 0) {
+          // insert as first child of next note
+          if (note._id === nextNoteId) {
+            note = {
+              ...note,
+              childrenIds: [id, ...note.childrenIds],
+            };
+          }
+        } else if (note._id === parentOfNextNote._id) {
+          // insert after next note
+          const index = note.childrenIds.indexOf(nextNoteId);
+          note = {
+            ...note,
+            childrenIds: [
+              ...note.childrenIds.slice(0, index + 1),
+              id,
+              ...note.childrenIds.slice(index + 1),
+            ],
+          };
+        }
+
+        return note;
       })
     );
   }

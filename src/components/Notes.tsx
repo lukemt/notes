@@ -15,6 +15,8 @@ interface NoteProps {
   onSelectNextNote: (id: string) => void;
   onExpandNote: (id: string) => void;
   onCollapseNote: (id: string) => void;
+  onMoveUpNote: (id: string) => void;
+  onMoveDownNote: (id: string) => void;
 }
 
 export default function Notes({
@@ -30,6 +32,8 @@ export default function Notes({
   onSelectNextNote,
   onExpandNote,
   onCollapseNote,
+  onMoveUpNote,
+  onMoveDownNote,
 }: NoteProps) {
   const note = getNote(notes, id);
   if (!note) {
@@ -53,6 +57,8 @@ export default function Notes({
         onSelectNext={() => onSelectNextNote(note._id)}
         onExpand={() => onExpandNote(note._id)}
         onCollapse={() => onCollapseNote(note._id)}
+        onMoveUp={() => onMoveUpNote(note._id)}
+        onMoveDown={() => onMoveDownNote(note._id)}
       />
       {note.isExpanded && note.childrenIds.length > 0 && (
         <ul className="pl-10">
@@ -71,6 +77,8 @@ export default function Notes({
               onSelectNextNote={onSelectNextNote}
               onExpandNote={onExpandNote}
               onCollapseNote={onCollapseNote}
+              onMoveUpNote={onMoveUpNote}
+              onMoveDownNote={onMoveDownNote}
             />
           ))}
         </ul>
