@@ -1,4 +1,4 @@
-import { Note } from "../types";
+import { Note } from "../noteModel/types";
 import { setLocalStorageItem } from "./localStorage";
 import { getLocalStorageItem } from "./localStorage";
 import { debounce } from "lodash";
