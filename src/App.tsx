@@ -95,7 +95,10 @@ export default function App() {
         // set the reference:
         .map((note) => {
           // if the sponsoring note has children, add new note to the top of the children
-          if (sponsoringNote.childrenIds.length) {
+          if (
+            sponsoringNote.isExpanded &&
+            sponsoringNote.childrenIds.length > 0
+          ) {
             if (note._id === sponsoringNote._id) {
               return {
                 ...note,
@@ -210,6 +213,7 @@ export default function App() {
           // add the note to the children array of the previous note
           return {
             ...note,
+            isExpanded: true,
             childrenIds: [...note.childrenIds, id],
           };
         } else if (note._id === id) {
