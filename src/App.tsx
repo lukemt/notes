@@ -23,7 +23,7 @@ export default function App() {
     <>
       <header>
         <ContentEditable
-          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md"
+          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md dark:from-gray-900 dark:to-blue-900"
           defaultValue={rootNote.text}
           needsFocus={false}
           onNewValue={(value) => updateNote(rootNote._id, value)}
@@ -34,6 +34,8 @@ export default function App() {
           onOutdent={() => {}}
           onSelectPrevious={() => {}}
           onSelectNext={() => {}}
+          onExpand={() => {}}
+          onCollapse={() => {}}
         />
       </header>
       <main className="max-w-md mx-auto my-20">
@@ -51,11 +53,13 @@ export default function App() {
               onOutdentNote={outdentNote}
               onSelectPreviousNote={selectPrevious}
               onSelectNextNote={selectNext}
+              onExpandNote={expandNote}
+              onCollapseNote={collapseNote}
             />
           ))}
         </ul>
       </main>
-      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl">
+      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl dark:from-gray-900 dark:to-green-900">
         foo
       </footer>
     </>
@@ -84,6 +88,7 @@ export default function App() {
           _id: newId,
           text: "",
           childrenIds: [],
+          isExpanded: true,
           needsFocus: true as true,
         },
       ]
@@ -294,5 +299,35 @@ export default function App() {
         })
       );
     }
+  }
+
+  function expandNote(id: string) {
+    setNotes(
+      notes.map((note) => {
+        if (note._id === id) {
+          return {
+            ...note,
+            isExpanded: true,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
+  }
+
+  function collapseNote(id: string) {
+    setNotes(
+      notes.map((note) => {
+        if (note._id === id) {
+          return {
+            ...note,
+            isExpanded: false,
+          };
+        } else {
+          return note;
+        }
+      })
+    );
   }
 }

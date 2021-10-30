@@ -12,6 +12,8 @@ interface ContentEditableProps {
   onOutdent: () => void;
   onSelectPrevious: () => void;
   onSelectNext: () => void;
+  onExpand: () => void;
+  onCollapse: () => void;
 }
 
 export default function ContentEditable({
@@ -25,6 +27,8 @@ export default function ContentEditable({
   onOutdent,
   onSelectPrevious,
   onSelectNext,
+  onExpand,
+  onCollapse,
   className,
 }: ContentEditableProps) {
   const [isFocus, setIsFocus] = useState(false);
@@ -54,6 +58,7 @@ export default function ContentEditable({
   return (
     <div
       className={className}
+      style={{ whiteSpace: "pre-line" }}
       contentEditable={true}
       spellCheck={true}
       ref={ref}
@@ -72,8 +77,10 @@ export default function ContentEditable({
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     switch (e.key) {
       case "Enter": {
-        onEnter();
-        e.preventDefault();
+        if (!e.shiftKey) {
+          onEnter();
+          e.preventDefault();
+        }
         break;
       }
 
@@ -105,7 +112,11 @@ export default function ContentEditable({
         //     onSelectPrevious();
         //   }
         // }
-        onSelectPrevious();
+        if (e.ctrlKey || e.metaKey) {
+          onCollapse();
+        } else {
+          onSelectPrevious();
+        }
         break;
       }
 
@@ -119,7 +130,11 @@ export default function ContentEditable({
         //     onSelectNext();
         //   }
         // }
-        onSelectNext();
+        if (e.ctrlKey || e.metaKey) {
+          onExpand();
+        } else {
+          onSelectNext();
+        }
         break;
       }
     }
