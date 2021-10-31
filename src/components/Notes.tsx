@@ -40,7 +40,12 @@ export default function Notes({
   return (
     <li>
       <ContentEditable
-        className="px-5 py-3 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800"
+        className={
+          "px-5 py-3 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
+          (!note.isExpanded && note.childrenIds.length > 0
+            ? "border-l-4 border-gray-500 dark:border-green-600"
+            : "")
+        }
         defaultValue={note.text}
         needsFocus={note.needsFocus}
         onNewValue={(value) => onUpdateNote(note._id, value)}

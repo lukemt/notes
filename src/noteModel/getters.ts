@@ -18,7 +18,7 @@ export function getParentNote(notes: Note[], id: string): Note {
 
 export function getLastVisibleChild(notes: Note[], id: string): string {
   const note = getNote(notes, id);
-  if (note.childrenIds.length > 0) {
+  if (note.childrenIds.length > 0 && note.isExpanded) {
     const lastChild = note.childrenIds[note.childrenIds.length - 1];
     // recursively get the last visible child of the last visible child
     return getLastVisibleChild(notes, lastChild);
@@ -73,7 +73,7 @@ export function getNextSilblingId(notes: Note[], id: string): string | null {
 
 export function getNextVisibleNoteId(notes: Note[], id: string): string {
   const note = getNote(notes, id);
-  if (note.childrenIds.length > 0) {
+  if (note.childrenIds.length > 0 && note.isExpanded) {
     const firstChild = note.childrenIds[0];
     return firstChild;
   } else {
