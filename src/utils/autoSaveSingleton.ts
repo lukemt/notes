@@ -5,10 +5,12 @@ import { debounce } from "lodash";
 import { initialNotes } from "../noteModel/initialNotes";
 
 let savedNotes: Note[] | null = null;
+let toBeSavedNotes: Note[] | null = null;
 
 function saveNotesToLocalStorage() {
-  if (savedNotes) {
-    setLocalStorageItem("notes", savedNotes);
+  if (toBeSavedNotes !== null && toBeSavedNotes !== savedNotes) {
+    setLocalStorageItem("notes", toBeSavedNotes);
+    savedNotes = toBeSavedNotes;
     console.log("Saved notes to localstorage");
   } else {
     console.error("No notes to save");
@@ -24,7 +26,7 @@ window.addEventListener("beforeunload", () => {
 });
 
 export function saveNotes(notes: Note[]) {
-  savedNotes = notes;
+  toBeSavedNotes = notes;
   debouncedSaveNotesToLocalStorage();
 }
 
