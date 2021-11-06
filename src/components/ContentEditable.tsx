@@ -145,7 +145,6 @@ export default function ContentEditable({
   }
 
   function handleBlur(e: React.FormEvent<HTMLDivElement>) {
-    console.log("ContentEditable: onBlur: replacing with defaultValue");
     const div = e.target as HTMLDivElement;
     if ((div.textContent ?? "") !== defaultValue)
       console.error("A ContentEditable seems to be wrongly updated", {

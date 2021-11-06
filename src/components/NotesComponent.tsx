@@ -1,9 +1,9 @@
-import { getNote } from "../noteModel/getters";
-import { Note } from "../noteModel/types";
+import { useSubscribeOneNote } from "../hooks/useSubscribeOneNote";
+import { NotesModel } from "../noteModel/NotesModel";
 import ContentEditable from "./ContentEditable";
 
 interface NoteProps {
-  notes: Note[];
+  notesModel: NotesModel;
   id: string;
   onUpdateNote: (id: string, value: string) => void;
   onAddNote: (id: string) => void;
@@ -17,8 +17,8 @@ interface NoteProps {
   onCollapseNote: (id: string) => void;
 }
 
-export default function Notes({
-  notes,
+export default function NotesComponent({
+  notesModel,
   id,
   onUpdateNote,
   onAddNote,
@@ -31,7 +31,8 @@ export default function Notes({
   onExpandNote,
   onCollapseNote,
 }: NoteProps) {
-  const note = getNote(notes, id);
+  const note = useSubscribeOneNote(notesModel, id);
+
   if (!note) {
     console.error("Note not found", id);
     return null;
@@ -62,9 +63,9 @@ export default function Notes({
       {note.isExpanded && note.childrenIds.length > 0 && (
         <ul className="pl-10">
           {note.childrenIds.map((childId) => (
-            <Notes
+            <NotesComponent
               key={childId}
-              notes={notes}
+              notesModel={notesModel}
               id={childId}
               onUpdateNote={onUpdateNote}
               onAddNote={onAddNote}
