@@ -33,7 +33,7 @@ export default function NotesComponent({
   onExpandNote,
   onCollapseNote,
 }: NoteProps) {
-  const note = useSubscribeOneNote(notesModel, id);
+  const note = notesModel.getOne(id);
 
   if (!note) {
     console.error("Note not found", id);

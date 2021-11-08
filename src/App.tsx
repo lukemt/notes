@@ -2,13 +2,12 @@ import { useState } from "react";
 import { Flipper } from "react-flip-toolkit";
 import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
-import { useSubscribeOneNote } from "./hooks/useSubscribeOneNote";
 import { NotesModel } from "./noteModel/NotesModel";
 import { Store } from "./noteModel/Store";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
-  const [notesModel] = useState(() => {
+  const [notesModel, setNotesModel] = useState(() => {
     const notes = loadNotes();
     const notesStore = new Store(notes);
     const notesModel = new NotesModel(notesStore);
@@ -16,7 +15,7 @@ export default function App() {
     return notesModel;
   });
 
-  const rootNote = useSubscribeOneNote(notesModel, "ROOT")!;
+  const rootNote = notesModel.getOne("ROOT")!;
 
   return (
     <>
@@ -45,18 +44,30 @@ export default function App() {
                 key={id}
                 notesModel={notesModel}
                 id={id}
-                onUpdateNote={(id, text) => notesModel.updateNoteText(id, text)}
-                onAddNote={(sponsoringNoteId) =>
-                  notesModel.addNoteBelow(sponsoringNoteId)
+                onUpdateNote={(id, text) =>
+                  setNotesModel(notesModel.updateNoteText(id, text))
                 }
-                onDeleteNote={(id) => notesModel.deleteNote(id)}
-                onFocusTriggered={(id) => notesModel.removeNeedsFocus(id)}
-                onIndentNote={(id) => notesModel.indentNote(id)}
-                onOutdentNote={(id) => notesModel.outdentNote(id)}
-                onSelectPreviousNote={(id) => notesModel.selectPrevious(id)}
-                onSelectNextNote={(id) => notesModel.selectNext(id)}
-                onExpandNote={(id) => notesModel.expandNote(id)}
-                onCollapseNote={(id) => notesModel.collapseNote(id)}
+                onAddNote={(sponsoringNoteId) =>
+                  setNotesModel(notesModel.addNoteBelow(sponsoringNoteId))
+                }
+                onDeleteNote={(id) => setNotesModel(notesModel.deleteNote(id))}
+                onFocusTriggered={(id) =>
+                  setNotesModel(notesModel.removeNeedsFocus(id))
+                }
+                onIndentNote={(id) => setNotesModel(notesModel.indentNote(id))}
+                onOutdentNote={(id) =>
+                  setNotesModel(notesModel.outdentNote(id))
+                }
+                onSelectPreviousNote={(id) =>
+                  setNotesModel(notesModel.selectPrevious(id))
+                }
+                onSelectNextNote={(id) =>
+                  setNotesModel(notesModel.selectNext(id))
+                }
+                onExpandNote={(id) => setNotesModel(notesModel.expandNote(id))}
+                onCollapseNote={(id) =>
+                  setNotesModel(notesModel.collapseNote(id))
+                }
               />
             ))}
           </ul>

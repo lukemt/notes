@@ -9,6 +9,10 @@ export class NotesModel {
     this.notesStore = notesStore;
   }
 
+  newSelf() {
+    return new NotesModel(this.notesStore);
+  }
+
   subscribeOne(id: string | null, callback: (note: Note | null) => void) {
     return this.notesStore.subscribeOne(id, callback);
   }
@@ -107,9 +111,9 @@ export class NotesModel {
   }
 
   // Mutations:
-
   updateNoteText(noteId: string, newText: string) {
     this.notesStore.patchOne(noteId, { text: newText });
+    return this.newSelf();
   }
 
   addNoteBelow(sponsoringNoteId: string) {
@@ -156,6 +160,7 @@ export class NotesModel {
         };
       });
     }
+    return this.newSelf();
   }
 
   deleteNote(id: string) {
@@ -172,12 +177,12 @@ export class NotesModel {
 
     // Don't delete the last note
     if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
-      return;
+      return this;
     }
 
     // Don't delete if the note has children
     if (note.childrenIds.length > 0) {
-      return;
+      return this;
     }
 
     // Remove the reference to the note from the parent note
@@ -192,12 +197,16 @@ export class NotesModel {
     this.notesStore.patchOne(previousNoteId, {
       needsFocus: true, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   removeNeedsFocus(id: string) {
     this.notesStore.patchOne(id, {
       needsFocus: undefined, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   indentNote(id: string) {
@@ -207,7 +216,7 @@ export class NotesModel {
     }
     const index = parentNote.childrenIds.indexOf(id);
     if (index === 0) {
-      return;
+      return this;
     }
 
     // remove the note from the children array of the parent
@@ -226,6 +235,8 @@ export class NotesModel {
     this.notesStore.patchOne(id, {
       needsFocus: true, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   outdentNote(id: string) {
@@ -235,7 +246,7 @@ export class NotesModel {
     }
 
     if (parentNote._id === "ROOT") {
-      return;
+      return this;
     }
 
     const grandParentNote = this.getParent(parentNote._id);
@@ -264,37 +275,47 @@ export class NotesModel {
     this.notesStore.patchOne(id, {
       needsFocus: true, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   selectNext(id: string) {
     const nextId = this.getNextVisibleNoteId(id);
     if (!nextId) {
-      return;
+      return this;
     }
     this.notesStore.patchOne(nextId, {
       needsFocus: true, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   selectPrevious(id: string) {
     const previousId = this.getPreviousVisibleNoteId(id);
     if (!previousId) {
-      return;
+      return this;
     }
     this.notesStore.patchOne(previousId, {
       needsFocus: true, // TODO move to memory store
     });
+
+    return this.newSelf();
   }
 
   expandNote(id: string) {
     this.notesStore.patchOne(id, {
       isExpanded: true,
     });
+
+    return this.newSelf();
   }
 
   collapseNote(id: string) {
     this.notesStore.patchOne(id, {
       isExpanded: false,
     });
+
+    return this.newSelf();
   }
 }
