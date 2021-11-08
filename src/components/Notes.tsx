@@ -1,9 +1,11 @@
-import { getNote } from "../noteModel/getters";
+import { doc, onSnapshot, collection } from "@firebase/firestore";
+import { useContext, useEffect, useState } from "react";
+import FirebaseContext from "../contexts/FirebaseContext";
+import { parseNote } from "../noteModel/parseNote";
 import { Note } from "../noteModel/types";
 import ContentEditable from "./ContentEditable";
 
 interface NoteProps {
-  notes: Note[];
   id: string;
   onUpdateNote: (id: string, value: string) => void;
   onAddNote: (id: string) => void;
@@ -18,7 +20,6 @@ interface NoteProps {
 }
 
 export default function Notes({
-  notes,
   id,
   onUpdateNote,
   onAddNote,
@@ -31,9 +32,30 @@ export default function Notes({
   onExpandNote,
   onCollapseNote,
 }: NoteProps) {
-  const note = getNote(notes, id);
+  const [error, setError] = useState<Error | null>(null);
+  const [note, setNote] = useState<Note | null>(null);
+
+  const firebase = useContext(FirebaseContext);
+  useEffect(() => {
+    const noteRef = doc(firebase.db, "notes", id);
+    return onSnapshot(noteRef, (noteDoc) => {
+      const docData = noteDoc.data();
+      if (!docData) {
+        console.error("No data for note", id);
+        setError(new Error("No data for note"));
+        return;
+      }
+      console.log("found note", docData);
+      setNote(parseNote(noteDoc.id, docData));
+    });
+  }, [firebase, id]);
+
+  if (error) {
+    return <div>Error: {error.message}</div>;
+  }
+
   if (!note) {
-    console.error("Note not found", id);
+    // loading
     return null;
   }
 
@@ -64,7 +86,6 @@ export default function Notes({
           {note.childrenIds.map((childId) => (
             <Notes
               key={childId}
-              notes={notes}
               id={childId}
               onUpdateNote={onUpdateNote}
               onAddNote={onAddNote}

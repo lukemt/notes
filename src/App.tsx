@@ -1,23 +1,53 @@
+import { doc, getDoc, onSnapshot, setDoc } from "@firebase/firestore";
 import { nanoid } from "nanoid";
-import { useEffect, useState } from "react";
+import { useContext, useEffect, useState } from "react";
 import ContentEditable from "./components/ContentEditable";
 import Notes from "./components/Notes";
+import FirebaseContext from "./contexts/FirebaseContext";
 import {
   getNextVisibleNoteId,
   getNote,
   getParentNote,
   getPreviousVisibleNoteId,
 } from "./noteModel/getters";
+import { parseNote } from "./noteModel/parseNote";
+import { Note } from "./noteModel/types";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
-  const [notes, setNotes] = useState(() => loadNotes());
+  const [error, setError] = useState<Error | null>(null);
+  const [rootNote, setRootNote] = useState<Note | null>(null);
 
+  const [notes, setNotes] = useState(() => loadNotes());
   useEffect(() => {
     saveNotes(notes);
   }, [notes]);
 
-  const rootNote = getNote(notes, "ROOT");
+  // const rootNote = getNote(notes, "ROOT");
+
+  const firebase = useContext(FirebaseContext);
+
+  useEffect(() => {
+    // set root note
+    return onSnapshot(doc(firebase.db, "notes", "ROOT"), (doc) => {
+      const docData = doc.data();
+      if (docData) {
+        console.log("retrieved root note", docData);
+        setRootNote(parseNote(doc.id, docData));
+      } else {
+        console.error("Root note not found");
+        setError(new Error("Root note not found"));
+      }
+    });
+  }, [firebase]);
+
+  if (error) {
+    return <div>{error.message}</div>;
+  }
+
+  if (!rootNote) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>
@@ -43,7 +73,6 @@ export default function App() {
           {rootNote.childrenIds.map((id) => (
             <Notes
               key={id}
-              notes={notes}
               id={id}
               onUpdateNote={updateNote}
               onAddNote={addNote}
@@ -66,65 +95,59 @@ export default function App() {
   );
 
   function updateNote(id: string, text: string) {
-    setNotes(
-      notes.map((note) => {
-        if (note._id === id) {
-          return { ...note, text };
-        }
-        return note;
-      })
-    );
+    const noteDocRef = doc(firebase.db, "notes", id);
+    setDoc(noteDocRef, { text }, { merge: true });
   }
 
-  function addNote(sponsoringNoteId: string) {
-    const sponsoringNote = getNote(notes, sponsoringNoteId);
-    const newId = nanoid();
+  async function addNote(sponsoringNoteId: string) {
+    const sponsoringNoteDocRef = doc(firebase.db, "notes", sponsoringNoteId);
+    const sponsoringNoteDoc = await getDoc(sponsoringNoteDocRef);
+    const sponsoringNoteDocData = sponsoringNoteDoc.data();
+    if (!sponsoringNoteDocData) {
+      console.error("sponsoring note not found");
+      setError(new Error("sponsoring note not found"));
+      return;
+    }
+    const sponsoringNote = parseNote(sponsoringNoteId, sponsoringNoteDocData);
+    const newNoteId = nanoid();
 
-    setNotes(
-      // add an empty note to the collection
-      [
-        ...notes,
-        {
-          _id: newId,
-          text: "",
-          childrenIds: [],
-          isExpanded: true,
-          needsFocus: true as true,
-        },
-      ]
-        // set the reference:
-        .map((note) => {
-          // if the sponsoring note has children, add new note to the top of the children
-          if (
-            sponsoringNote.isExpanded &&
-            sponsoringNote.childrenIds.length > 0
-          ) {
-            if (note._id === sponsoringNote._id) {
-              return {
-                ...note,
-                childrenIds: [newId, ...note.childrenIds],
-              };
-            }
-          }
-          // if sponsoring note has no children, add new note in the middle of the list below the sponsoring note
-          // when we have the parent:
-          else if (note.childrenIds.includes(sponsoringNoteId)) {
-            // get index of the sponsoring note in the children array
-            const index = note.childrenIds.indexOf(sponsoringNoteId);
-            // insert the new note id after the sponsoring note
-            return {
-              ...note,
-              childrenIds: [
-                ...note.childrenIds.slice(0, index + 1),
-                newId,
-                ...note.childrenIds.slice(index + 1),
-              ],
-            };
-          }
-          // otherwise, do nothing
-          return note;
-        })
+    // add an empty note to the collection
+    const newNote: Note = {
+      _id: newNoteId,
+      text: "",
+      childrenIds: [],
+      isExpanded: true,
+    };
+
+    setDoc(doc(firebase.db, "notes", newNoteId), newNote);
+
+    // if the sponsoring note has children, add new note to the top of the children
+    // if (sponsoringNote.isExpanded && sponsoringNote.childrenIds.length > 0) {
+    const newChildrenIds = [newNoteId, ...sponsoringNote.childrenIds];
+    setDoc(
+      sponsoringNoteDocRef,
+      { childrenIds: newChildrenIds },
+      { merge: true }
     );
+    // }
+    /*
+    // if sponsoring note has no children, add new note in the middle of the list below the sponsoring note
+    // when we have the parent:
+    else {
+      const parentNote = getParentNote(notes, sponsoringNoteId);
+      // get index of the sponsoring note in the children array
+      const index = note.childrenIds.indexOf(sponsoringNoteId);
+      // insert the new note id after the sponsoring note
+      return {
+        ...note,
+        childrenIds: [
+          ...note.childrenIds.slice(0, index + 1),
+          newId,
+          ...note.childrenIds.slice(index + 1),
+        ],
+      };
+    } */
+    // otherwise, do nothing
   }
 
   function deleteNote(id: string) {
@@ -306,18 +329,8 @@ export default function App() {
   }
 
   function expandNote(id: string) {
-    setNotes(
-      notes.map((note) => {
-        if (note._id === id) {
-          return {
-            ...note,
-            isExpanded: true,
-          };
-        } else {
-          return note;
-        }
-      })
-    );
+    const noteDocRef = doc(firebase.db, "notes", id);
+    setDoc(noteDocRef, { isExpanded: true }, { merge: true });
   }
 
   function collapseNote(id: string) {

@@ -29,5 +29,6 @@ export function saveNotes(notes: Note[]) {
 }
 
 export function loadNotes(): Note[] {
+  return initialNotes;
   return getLocalStorageItem<Note[]>("notes") ?? initialNotes;
 }
