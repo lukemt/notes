@@ -1,11 +1,11 @@
 import { nanoid } from "nanoid";
-import { NotesStore } from "./NotesStore";
+import { Store } from "./Store";
 import { Note } from "./types";
 
 export class NotesModel {
-  private notesStore: NotesStore;
+  private notesStore: Store<Note>;
 
-  constructor(notesStore: NotesStore) {
+  constructor(notesStore: Store<Note>) {
     this.notesStore = notesStore;
   }
 

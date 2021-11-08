@@ -4,13 +4,13 @@ import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
 import { useSubscribeOneNote } from "./hooks/useSubscribeOneNote";
 import { NotesModel } from "./noteModel/NotesModel";
-import { NotesStore } from "./noteModel/NotesStore";
+import { Store } from "./noteModel/Store";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
   const [notesModel] = useState(() => {
     const notes = loadNotes();
-    const notesStore = new NotesStore(notes);
+    const notesStore = new Store(notes);
     const notesModel = new NotesModel(notesStore);
     notesModel.subscribeOne(null, () => saveNotes(notesStore.getAll()));
     return notesModel;
