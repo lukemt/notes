@@ -1,3 +1,4 @@
+import { Flipper } from "react-flip-toolkit";
 import { nanoid } from "nanoid";
 import { useEffect, useState } from "react";
 import ContentEditable from "./components/ContentEditable";
@@ -39,29 +40,28 @@ export default function App() {
         />
       </header>
       <main className="max-w-md mx-auto my-20">
-        <ul>
-          {rootNote.childrenIds.map((id) => (
-            <Notes
-              key={id}
-              notes={notes}
-              id={id}
-              onUpdateNote={updateNote}
-              onAddNote={addNote}
-              onDeleteNote={deleteNote}
-              onFocusTriggered={removeNeedsFocus}
-              onIndentNote={indentNote}
-              onOutdentNote={outdentNote}
-              onSelectPreviousNote={selectPrevious}
-              onSelectNextNote={selectNext}
-              onExpandNote={expandNote}
-              onCollapseNote={collapseNote}
-            />
-          ))}
-        </ul>
+        <Flipper flipKey={notes}>
+          <ul>
+            {rootNote.childrenIds.map((id) => (
+              <Notes
+                key={id}
+                notes={notes}
+                id={id}
+                onUpdateNote={updateNote}
+                onAddNote={addNote}
+                onDeleteNote={deleteNote}
+                onFocusTriggered={removeNeedsFocus}
+                onIndentNote={indentNote}
+                onOutdentNote={outdentNote}
+                onSelectPreviousNote={selectPrevious}
+                onSelectNextNote={selectNext}
+                onExpandNote={expandNote}
+                onCollapseNote={collapseNote}
+              />
+            ))}
+          </ul>
+        </Flipper>
       </main>
-      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl dark:from-gray-900 dark:to-green-900">
-        foo
-      </footer>
     </>
   );
 
