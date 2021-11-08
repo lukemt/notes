@@ -1,4 +1,5 @@
 import { useState } from "react";
+import { Flipper } from "react-flip-toolkit";
 import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
 import { useSubscribeOneNote } from "./hooks/useSubscribeOneNote";
@@ -37,31 +38,30 @@ export default function App() {
         />
       </header>
       <main className="max-w-md mx-auto my-20">
-        <ul>
-          {rootNote.childrenIds.map((id) => (
-            <NotesComponent
-              key={id}
-              notesModel={notesModel}
-              id={id}
-              onUpdateNote={(id, text) => notesModel.updateNoteText(id, text)}
-              onAddNote={(sponsoringNoteId) =>
-                notesModel.addNoteBelow(sponsoringNoteId)
-              }
-              onDeleteNote={(id) => notesModel.deleteNote(id)}
-              onFocusTriggered={(id) => notesModel.removeNeedsFocus(id)}
-              onIndentNote={(id) => notesModel.indentNote(id)}
-              onOutdentNote={(id) => notesModel.outdentNote(id)}
-              onSelectPreviousNote={(id) => notesModel.selectPrevious(id)}
-              onSelectNextNote={(id) => notesModel.selectNext(id)}
-              onExpandNote={(id) => notesModel.expandNote(id)}
-              onCollapseNote={(id) => notesModel.collapseNote(id)}
-            />
-          ))}
-        </ul>
+        <Flipper flipKey={notesModel}>
+          <ul>
+            {rootNote.childrenIds.map((id) => (
+              <NotesComponent
+                key={id}
+                notesModel={notesModel}
+                id={id}
+                onUpdateNote={(id, text) => notesModel.updateNoteText(id, text)}
+                onAddNote={(sponsoringNoteId) =>
+                  notesModel.addNoteBelow(sponsoringNoteId)
+                }
+                onDeleteNote={(id) => notesModel.deleteNote(id)}
+                onFocusTriggered={(id) => notesModel.removeNeedsFocus(id)}
+                onIndentNote={(id) => notesModel.indentNote(id)}
+                onOutdentNote={(id) => notesModel.outdentNote(id)}
+                onSelectPreviousNote={(id) => notesModel.selectPrevious(id)}
+                onSelectNextNote={(id) => notesModel.selectNext(id)}
+                onExpandNote={(id) => notesModel.expandNote(id)}
+                onCollapseNote={(id) => notesModel.collapseNote(id)}
+              />
+            ))}
+          </ul>
+        </Flipper>
       </main>
-      <footer className="fixed bottom-0 inset-x-0 p-5  bg-gradient-to-br from-white to-blue-50 shadow-xl dark:from-gray-900 dark:to-green-900">
-        foo
-      </footer>
     </>
   );
 }

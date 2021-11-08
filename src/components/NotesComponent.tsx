@@ -1,6 +1,8 @@
 import { useSubscribeOneNote } from "../hooks/useSubscribeOneNote";
 import { NotesModel } from "../noteModel/NotesModel";
+import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";
+import ExpandIcon from "./ExpandButton";
 
 interface NoteProps {
   notesModel: NotesModel;
@@ -40,26 +42,39 @@ export default function NotesComponent({
 
   return (
     <li>
-      <ContentEditable
-        className={
-          "px-5 py-3 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
-          (!note.isExpanded && note.childrenIds.length > 0
-            ? "border-l-4 border-gray-500 dark:border-green-600"
-            : "")
-        }
-        defaultValue={note.text}
-        needsFocus={note.needsFocus}
-        onNewValue={(value) => onUpdateNote(note._id, value)}
-        onEnter={() => onAddNote(note._id)}
-        onDelete={() => onDeleteNote(note._id)}
-        onFocusTriggered={() => onFocusTriggered(note._id)}
-        onIndent={() => onIndentNote(note._id)}
-        onOutdent={() => onOutdentNote(note._id)}
-        onSelectPrevious={() => onSelectPreviousNote(note._id)}
-        onSelectNext={() => onSelectNextNote(note._id)}
-        onExpand={() => onExpandNote(note._id)}
-        onCollapse={() => onCollapseNote(note._id)}
-      />
+      <Flipped flipId={note._id}>
+        <div
+          className={
+            "flex items-center group focus-within:ring-2 ring-blue-600 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
+            (!note.isExpanded && note.childrenIds.length > 0
+              ? "border-l-4 border-blue-700 dark:border-green-600"
+              : "")
+          }
+        >
+          <ContentEditable
+            className="flex-1 px-5 py-3 outline-none"
+            defaultValue={note.text}
+            needsFocus={note.needsFocus}
+            onNewValue={(value) => onUpdateNote(note._id, value)}
+            onEnter={() => onAddNote(note._id)}
+            onDelete={() => onDeleteNote(note._id)}
+            onFocusTriggered={() => onFocusTriggered(note._id)}
+            onIndent={() => onIndentNote(note._id)}
+            onOutdent={() => onOutdentNote(note._id)}
+            onSelectPrevious={() => onSelectPreviousNote(note._id)}
+            onSelectNext={() => onSelectNextNote(note._id)}
+            onExpand={() => onExpandNote(note._id)}
+            onCollapse={() => onCollapseNote(note._id)}
+          />
+          {note.childrenIds.length > 0 && (
+            <ExpandIcon
+              isExpanded={note.isExpanded}
+              onExpand={() => onExpandNote(note._id)}
+              onCollapse={() => onCollapseNote(note._id)}
+            />
+          )}
+        </div>
+      </Flipped>
       {note.isExpanded && note.childrenIds.length > 0 && (
         <ul className="pl-10">
           {note.childrenIds.map((childId) => (
