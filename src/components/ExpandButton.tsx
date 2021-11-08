@@ -10,7 +10,7 @@ export default function ExpandIcon({
   if (isExpanded) {
     return (
       <button
-        className="p-4 opacity-0 group-hover:opacity-100 transition text-gray-600"
+        className="p-4 opacity-0 group-hover:opacity-100 transition text-gray-600 dark:text-gray-50"
         onClick={onCollapse}
       >
         <svg
@@ -32,7 +32,7 @@ export default function ExpandIcon({
   } else {
     return (
       <button
-        className="p-4 opacity-100 group-hover:opacity-100 group-focus:opacity-100 transition text-gray-600"
+        className="p-4 opacity-100 group-hover:opacity-100 group-focus:opacity-100 transition text-gray-600 dark:text-gray-50 "
         onClick={onExpand}
       >
         <svg
