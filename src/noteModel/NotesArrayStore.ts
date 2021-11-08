@@ -1,6 +1,6 @@
-import { Note } from "./types";
+import { Note, NotesStore } from "./types";
 
-export class NotesStore {
+export class NotesArrayStore implements NotesStore {
   private notes: Note[];
   private subscriptions: {
     noteId: string | null;
@@ -11,7 +11,19 @@ export class NotesStore {
     this.notes = notes;
   }
 
-  subscribeOne(noteId: string | null, callback: (note: Note | null) => void) {
+  private async notifySubscribers(id: string) {
+    const note = await this.getOne(id);
+    this.subscriptions.forEach((subscription) => {
+      if (subscription.noteId === id || subscription.noteId === null) {
+        subscription.callback(note);
+      }
+    });
+  }
+
+  private addSubscriber(
+    noteId: string | null,
+    callback: (note: Note | null) => void
+  ) {
     console.log("subscribe", noteId);
     const subscription = { noteId, callback };
     this.subscriptions.push(subscription);
@@ -27,41 +39,42 @@ export class NotesStore {
     };
   }
 
-  private notifySubscribers(id: string) {
-    const note = this.getOne(id);
-    this.subscriptions.forEach((subscription) => {
-      if (subscription.noteId === id) {
-        subscription.callback(note);
-      }
-    });
-    this.subscriptions.forEach((subscription) => {
-      if (subscription.noteId === null) {
-        subscription.callback(note);
-      }
-    });
+  public subscribeOne(
+    id: string,
+    callback: (note: Note | null) => void
+  ): () => void {
+    (async () => callback(await this.getOne(id)))();
+    return this.addSubscriber(id, callback);
   }
 
-  getAll() {
+  public subscribeAll(callback: (note: Note | null) => void): () => void {
+    return this.addSubscriber(null, callback);
+  }
+
+  public getAll() {
     return this.notes;
   }
-  getOne(id: string) {
+  public async getOne(id: string) {
     return this.notes.find((note) => note._id === id) ?? null;
   }
-  addOne(note: Note) {
+  public async getParent(id: string) {
+    return this.notes.find((note) => note.childrenIds.includes(id)) ?? null;
+  }
+  public addOne(note: Note) {
     this.notes = [...this.notes, note];
     this.notifySubscribers(note._id);
   }
-  replaceOne(id: string, note: Note) {
+  public replaceOne(id: string, note: Note) {
     this.notes = this.notes.map((n) => (n._id === id ? note : n));
     this.notifySubscribers(id);
   }
-  patchOne(
+  public async patchOne(
     id: string,
     partialNote: Partial<Note> | ((note: Note) => Partial<Note>)
   ) {
     let newPartialNote = partialNote;
     if (typeof partialNote === "function") {
-      const gotNote = this.getOne(id);
+      const gotNote = await this.getOne(id);
       if (!gotNote) {
         throw new Error(`Note with id ${id} not found`);
       }
@@ -72,7 +85,7 @@ export class NotesStore {
     );
     this.notifySubscribers(id);
   }
-  deleteOne(id: string) {
+  public deleteOne(id: string) {
     this.notes = this.notes.filter((note) => note._id !== id);
     this.notifySubscribers(id);
   }

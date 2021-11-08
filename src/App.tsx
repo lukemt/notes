@@ -1,21 +1,93 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
 import { useSubscribeOneNote } from "./hooks/useSubscribeOneNote";
 import { NotesModel } from "./noteModel/NotesModel";
-import { NotesStore } from "./noteModel/NotesStore";
+import { NotesArrayStore } from "./noteModel/NotesArrayStore";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
+import { initFirebase, firebaseConfigInvalidVars } from "./utils/initFirebase";
+import { NotesFirestoreStore } from "./noteModel/NotesFirestoreStore";
+
+type DataSource = "localStorage" | "firestore";
+
+function initArrayStore(): NotesModel {
+  const notes = loadNotes();
+  const notesStore = new NotesArrayStore(notes);
+  const notesModel = new NotesModel(notesStore);
+  notesStore.subscribeAll(() => saveNotes(notesStore.getAll()));
+  return notesModel;
+}
+function initFirestore(): NotesModel {
+  const { firestore } = initFirebase(); // TODO: import lazily
+  const notesStore = new NotesFirestoreStore(firestore);
+  const notesModel = new NotesModel(notesStore);
+  return notesModel;
+}
 
 export default function App() {
-  const [notesModel] = useState(() => {
-    const notes = loadNotes();
-    const notesStore = new NotesStore(notes);
-    const notesModel = new NotesModel(notesStore);
-    notesModel.subscribeOne(null, () => saveNotes(notesStore.getAll()));
-    return notesModel;
-  });
-
+  const [dataSource, setDataSource] = useState<DataSource | null>(null);
+  const [notesModel, setNotesModel] = useState<NotesModel | null>(null);
   const rootNote = useSubscribeOneNote(notesModel, "ROOT")!;
+
+  useEffect(() => {
+    if (dataSource === "localStorage") {
+      setNotesModel(initArrayStore());
+    } else if (dataSource === "firestore") {
+      setNotesModel(initFirestore());
+    }
+  }, [dataSource]);
+
+  if (!dataSource) {
+    // show UI to choose data source designed with tailwind
+    return (
+      <div className="flex justify-center items-center h-screen">
+        <div className="w-full max-w-md">
+          <h1 className="text-2xl font-bold text-center mb-4">
+            Select data source
+          </h1>
+          <div className="flex gap-10">
+            <div className="flex-1 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+              <button
+                className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                onClick={() => setDataSource("localStorage")}
+              >
+                Local Storage
+              </button>
+            </div>
+
+            <div className="flex-1 bg-white shadow-md rounded px-8 pt-6 pb-8 mb-4">
+              {firebaseConfigInvalidVars.length > 0 ? (
+                <div className="text-red-500 text-center">
+                  Firebase config is invalid. Please check the `.env` config
+                  file. The following environment variables are missing:
+                  <ul className="list-disc list-inside">
+                    {firebaseConfigInvalidVars.map((key) => (
+                      <li key={key}>{key}</li>
+                    ))}
+                  </ul>
+                </div>
+              ) : (
+                <button
+                  className="w-full bg-blue-500 hover:bg-blue-700 text-white font-bold py-2 px-4 rounded"
+                  onClick={() => setDataSource("firestore")}
+                >
+                  Firestore
+                </button>
+              )}
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
+
+  if (!notesModel) {
+    return <div>Error</div>;
+  }
+
+  if (!rootNote) {
+    return <div>Loading...</div>;
+  }
 
   return (
     <>

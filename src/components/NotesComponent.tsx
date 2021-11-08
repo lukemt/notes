@@ -35,7 +35,6 @@ export default function NotesComponent({
   const note = useSubscribeOneNote(notesModel, id);
 
   if (!note) {
-    console.error("Note not found", id);
     return null;
   }
 

@@ -1,6 +1,5 @@
 import { nanoid } from "nanoid";
-import { NotesStore } from "./NotesStore";
-import { Note } from "./types";
+import { Note, NotesStore } from "./types";
 
 export class NotesModel {
   private notesStore: NotesStore;
@@ -9,23 +8,20 @@ export class NotesModel {
     this.notesStore = notesStore;
   }
 
-  subscribeOne(id: string | null, callback: (note: Note | null) => void) {
+  subscribeOne(id: string, callback: (note: Note | null) => void) {
     return this.notesStore.subscribeOne(id, callback);
   }
 
-  getOne(id: string): Note | null {
+  getOne(id: string): Promise<Note | null> {
     return this.notesStore.getOne(id);
   }
 
-  getParent(id: string): Note | null {
-    return (
-      this.notesStore.getAll().find((note) => note.childrenIds.includes(id)) ??
-      null
-    );
+  getParent(id: string): Promise<Note | null> {
+    return this.notesStore.getParent(id);
   }
 
-  getLastVisibleChildId(id: string): string {
-    const note = this.notesStore.getOne(id);
+  async getLastVisibleChildId(id: string): Promise<string> {
+    const note = await this.notesStore.getOne(id);
     if (!note) {
       throw new Error(`getLastVisibleChildId: Note with id ${id} not found`);
     }
@@ -38,9 +34,9 @@ export class NotesModel {
     }
   }
 
-  getPreviousSilblingId(id: string) {
+  async getPreviousSilblingId(id: string) {
     // find parent note
-    const parentNote = this.getParent(id);
+    const parentNote = await this.getParent(id);
     if (!parentNote) {
       throw new Error(`getPreviousSilblingId: Note with id ${id} not found`);
     }
@@ -59,9 +55,9 @@ export class NotesModel {
     }
   }
 
-  getPreviousVisibleNoteId(id: string): string {
+  async getPreviousVisibleNoteId(id: string): Promise<string> {
     const { previousSilblingId, previousSilblingIsParent } =
-      this.getPreviousSilblingId(id);
+      await this.getPreviousSilblingId(id);
     if (previousSilblingIsParent) {
       return previousSilblingId;
     } else {
@@ -69,9 +65,9 @@ export class NotesModel {
     }
   }
 
-  getNextSilblingId(id: string): string | null {
+  async getNextSilblingId(id: string): Promise<string | null> {
     // find parent note
-    const parentNote = this.getParent(id);
+    const parentNote = await this.getParent(id);
     if (!parentNote) {
       throw new Error(`getNextSilblingId: Note with id ${id} not found`);
     }
@@ -88,8 +84,8 @@ export class NotesModel {
     }
   }
 
-  getNextVisibleNoteId(id: string): string {
-    const note = this.notesStore.getOne(id);
+  async getNextVisibleNoteId(id: string): Promise<string> {
+    const note = await this.notesStore.getOne(id);
     if (!note) {
       throw new Error(`getNextVisibleNoteId: Note with id ${id} not found`);
     }
@@ -97,7 +93,7 @@ export class NotesModel {
       const firstChild = note.childrenIds[0];
       return firstChild;
     } else {
-      const nextSilblingId = this.getNextSilblingId(id);
+      const nextSilblingId = await this.getNextSilblingId(id);
       if (nextSilblingId) {
         return nextSilblingId;
       } else {
@@ -112,8 +108,8 @@ export class NotesModel {
     this.notesStore.patchOne(noteId, { text: newText });
   }
 
-  addNoteBelow(sponsoringNoteId: string) {
-    const sponsoringNote = this.notesStore.getOne(sponsoringNoteId);
+  async addNoteBelow(sponsoringNoteId: string) {
+    const sponsoringNote = await this.notesStore.getOne(sponsoringNoteId);
     if (!sponsoringNote) {
       throw new Error(
         `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} not found`
@@ -137,7 +133,7 @@ export class NotesModel {
     } else {
       // if sponsoring note has no children, add new note in the middle of the list below the sponsoring note
       // when we have the parent:
-      const parentNote = this.getParent(sponsoringNoteId);
+      const parentNote = await this.getParent(sponsoringNoteId);
       if (!parentNote) {
         throw new Error(
           `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} has no parent`
@@ -158,17 +154,17 @@ export class NotesModel {
     }
   }
 
-  deleteNote(id: string) {
-    const note = this.notesStore.getOne(id);
+  async deleteNote(id: string) {
+    const note = await this.notesStore.getOne(id);
     if (!note) {
       throw new Error(`deleteNote: Note with id ${id} not found`);
     }
 
-    const parentNote = this.getParent(id);
+    const parentNote = await this.getParent(id);
     if (!parentNote) {
       throw new Error(`deleteNote: Note with id ${id} not found`);
     }
-    const previousNoteId = this.getPreviousVisibleNoteId(id);
+    const previousNoteId = await this.getPreviousVisibleNoteId(id);
 
     // Don't delete the last note
     if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
@@ -200,8 +196,8 @@ export class NotesModel {
     });
   }
 
-  indentNote(id: string) {
-    const parentNote = this.getParent(id);
+  async indentNote(id: string) {
+    const parentNote = await this.getParent(id);
     if (!parentNote) {
       throw new Error(`indentNote: Note with id ${id} not found`);
     }
@@ -228,8 +224,8 @@ export class NotesModel {
     });
   }
 
-  outdentNote(id: string) {
-    const parentNote = this.getParent(id);
+  async outdentNote(id: string) {
+    const parentNote = await this.getParent(id);
     if (!parentNote) {
       throw new Error(`outdentNote: Note with id ${id} not found`);
     }
@@ -238,7 +234,7 @@ export class NotesModel {
       return;
     }
 
-    const grandParentNote = this.getParent(parentNote._id);
+    const grandParentNote = await this.getParent(parentNote._id);
     if (!grandParentNote) {
       throw new Error(`outdentNote: Note with id ${id} not found`);
     }
@@ -266,8 +262,8 @@ export class NotesModel {
     });
   }
 
-  selectNext(id: string) {
-    const nextId = this.getNextVisibleNoteId(id);
+  async selectNext(id: string) {
+    const nextId = await this.getNextVisibleNoteId(id);
     if (!nextId) {
       return;
     }
@@ -276,8 +272,8 @@ export class NotesModel {
     });
   }
 
-  selectPrevious(id: string) {
-    const previousId = this.getPreviousVisibleNoteId(id);
+  async selectPrevious(id: string) {
+    const previousId = await this.getPreviousVisibleNoteId(id);
     if (!previousId) {
       return;
     }
