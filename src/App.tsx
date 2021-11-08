@@ -22,13 +22,13 @@ export default function App() {
 
   return (
     <>
-      <header>
+      <header className="fixed top-0 inset-x-0 z-10 p-3 bg-gradient-to-br from-white to-blue-50 shadow-md dark:from-gray-900 dark:to-blue-900">
         <ContentEditable
-          className="fixed top-0 inset-x-0 p-5 bg-gradient-to-br from-white to-blue-50 shadow-md dark:from-gray-900 dark:to-blue-900"
+          className="max-w-md mx-auto py-2 px-4 text-xl tracking-wider rounded-xl"
           defaultValue={rootNote.text}
           needsFocus={false}
           onNewValue={(value) => updateNote(rootNote._id, value)}
-          onEnter={() => {}}
+          onEnter={() => addNote(rootNote._id)}
           onDelete={() => {}}
           onFocusTriggered={() => {}}
           onIndent={() => {}}
