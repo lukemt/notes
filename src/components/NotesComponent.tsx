@@ -2,6 +2,8 @@ import { NotesModel } from "../noteModel/NotesModel";
 import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";
 import ExpandIcon from "./ExpandButton";
+import PageIconButton from "./PageIconButton";
+import NoteMenu from "./NoteMenu";
 
 interface NoteProps {
   notesModel: NotesModel;
@@ -16,6 +18,7 @@ interface NoteProps {
   onSelectNextNote: (id: string) => void;
   onExpandNote: (id: string) => void;
   onCollapseNote: (id: string) => void;
+  onToggleIsPage: (id: string) => void;
 }
 
 export default function NotesComponent({
@@ -31,6 +34,7 @@ export default function NotesComponent({
   onSelectNextNote,
   onExpandNote,
   onCollapseNote,
+  onToggleIsPage,
 }: NoteProps) {
   const note = notesModel.getOne(id);
 
@@ -44,14 +48,23 @@ export default function NotesComponent({
       <Flipped flipId={note._id}>
         <div
           className={
-            "flex items-center group focus-within:ring-2 ring-blue-600 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
+            "flex items-center relative group focus-within:ring-2 ring-blue-600 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
             (!note.isExpanded && note.childrenIds.length > 0
               ? "border-l-4 border-blue-700 dark:border-green-600"
               : "")
           }
         >
+          <NoteMenu
+            isPage={note.isPage ?? false}
+            onToggleIsPage={() => onToggleIsPage(note._id)}
+          />
+          {note.isPage ? (
+            <PageIconButton onClick={() => alert("noce")} />
+          ) : (
+            <div className="w-5" />
+          )}
           <ContentEditable
-            className="flex-1 px-5 py-3 outline-none"
+            className="flex-1 py-3 outline-none"
             defaultValue={note.text}
             needsFocus={note.needsFocus}
             onNewValue={(value) => onUpdateNote(note._id, value)}
@@ -91,6 +104,7 @@ export default function NotesComponent({
               onSelectNextNote={onSelectNextNote}
               onExpandNote={onExpandNote}
               onCollapseNote={onCollapseNote}
+              onToggleIsPage={onToggleIsPage}
             />
           ))}
         </ul>

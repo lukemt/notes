@@ -85,6 +85,7 @@ export default function App() {
                 onSelectNextNote={(id) => notesModel.selectNext(id)}
                 onExpandNote={(id) => notesModel.expandNote(id)}
                 onCollapseNote={(id) => notesModel.collapseNote(id)}
+                onToggleIsPage={(id) => notesModel.toggleIsPage(id)}
               />
             ))}
           </ul>

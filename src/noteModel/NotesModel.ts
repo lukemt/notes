@@ -333,4 +333,13 @@ export class NotesModel {
       });
     });
   }
+
+  toggleIsPage(id: string) {
+    this.transactionManager.runTransaction((transaction) => {
+      transaction.patchOne(id, (note) => ({
+        isPage: !note.isPage,
+        isExpanded: false,
+      }));
+    });
+  }
 }

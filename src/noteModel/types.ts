@@ -4,4 +4,5 @@ export interface Note {
   childrenIds: string[];
   isExpanded: boolean;
   needsFocus?: true;
+  isPage?: boolean;
 }
