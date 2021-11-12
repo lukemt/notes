@@ -338,7 +338,7 @@ export class NotesModel {
     this.transactionManager.runTransaction((transaction) => {
       transaction.patchOne(id, (note) => ({
         isPage: !note.isPage,
-        isExpanded: false,
+        isExpanded: note.isPage ? note.isExpanded : false,
       }));
     });
   }

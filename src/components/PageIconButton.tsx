@@ -6,7 +6,7 @@ export default function PageIconButton({ onClick }: PageIconButtonProps) {
   console.log("render PageIconButton");
   return (
     <button
-      className="p-3 transition ease-out x-hover:scale-125 text-blue-700"
+      className="p-3 transition ease-out hover:scale-125 text-blue-700 dark:text-blue-200"
       onClick={onClick}
     >
       <svg

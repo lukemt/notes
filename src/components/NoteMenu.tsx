@@ -10,7 +10,7 @@ export default function NoteMenu({ isPage, onToggleIsPage }: NoteMenuProps) {
   return (
     <StyledButton
       onClick={onToggleIsPage}
-      className="p-3 opacity-0 group-hover:opacity-100 text-gray-400 hover:text-gray-900 x-hover:scale-125 transition"
+      className="p-3 opacity-0 group-hover:opacity-100 text-gray-400 dark:text-gray-600 hover:text-gray-900 dark:hover:text-gray-50 hover:scale-125 transition"
     >
       {isPage ? (
         <svg
