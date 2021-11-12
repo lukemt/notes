@@ -1,4 +1,3 @@
-import { useSubscribeOneNote } from "../hooks/useSubscribeOneNote";
 import { NotesModel } from "../noteModel/NotesModel";
 import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";

@@ -1,20 +1,12 @@
 import { nanoid } from "nanoid";
-import { Store } from "./Store";
+import { TransactionStore } from "./TransactionStore";
 import { Note } from "./types";
 
 export class NotesModel {
-  private notesStore: Store<Note>;
+  private notesStore: TransactionStore<Note>;
 
-  constructor(notesStore: Store<Note>) {
+  constructor(notesStore: TransactionStore<Note>) {
     this.notesStore = notesStore;
-  }
-
-  newSelf() {
-    return new NotesModel(this.notesStore);
-  }
-
-  subscribeOne(id: string | null, callback: (note: Note | null) => void) {
-    return this.notesStore.subscribeOne(id, callback);
   }
 
   getOne(id: string): Note | null {
@@ -112,171 +104,183 @@ export class NotesModel {
 
   // Mutations:
   updateNoteText(noteId: string, newText: string) {
-    this.notesStore.patchOne(noteId, { text: newText });
-    return this.newSelf();
+    const note = this.notesStore.getOne(noteId);
+    if (!note) {
+      console.error(`updateNoteText: Note with id ${noteId} not found`);
+      return;
+    }
+    if (note.text === newText) {
+      return;
+    }
+    this.notesStore.runTransaction((transaction) => {
+      transaction.patchOne(noteId, { text: newText });
+    });
   }
 
   addNoteBelow(sponsoringNoteId: string) {
-    const sponsoringNote = this.notesStore.getOne(sponsoringNoteId);
-    if (!sponsoringNote) {
-      throw new Error(
-        `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} not found`
-      );
-    }
-
-    const newNote: Note = {
-      _id: nanoid(),
-      text: "",
-      childrenIds: [],
-      isExpanded: true,
-      needsFocus: true, // TODO move to memory store
-    };
-    this.notesStore.addOne(newNote);
-
-    // if the sponsoring note has expanded children, add new note to the top of the children
-    if (sponsoringNote.isExpanded && sponsoringNote.childrenIds.length > 0) {
-      this.notesStore.patchOne(sponsoringNoteId, {
-        childrenIds: [newNote._id, ...sponsoringNote.childrenIds],
-      });
-    } else {
-      // if sponsoring note has no children, add new note in the middle of the list below the sponsoring note
-      // when we have the parent:
-      const parentNote = this.getParent(sponsoringNoteId);
-      if (!parentNote) {
+    this.notesStore.runTransaction((transaction) => {
+      const sponsoringNote = transaction.getOne(sponsoringNoteId);
+      if (!sponsoringNote) {
         throw new Error(
-          `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} has no parent`
+          `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} not found`
         );
       }
-      // insert the new note id after the sponsoring note
-      this.notesStore.patchOne(parentNote._id, (note) => {
-        // get index of the sponsoring note in the children array
-        const index = note.childrenIds.indexOf(sponsoringNoteId);
+
+      const newNote: Note = {
+        _id: nanoid(),
+        text: "",
+        childrenIds: [],
+        isExpanded: true,
+        needsFocus: true, // TODO move to memory store
+      };
+      transaction.addOne(newNote);
+
+      // if the sponsoring note has expanded children, add new note to the top of the children
+      if (sponsoringNote.isExpanded && sponsoringNote.childrenIds.length > 0) {
+        transaction.patchOne(sponsoringNoteId, {
+          childrenIds: [newNote._id, ...sponsoringNote.childrenIds],
+        });
+      } else {
+        // if sponsoring note has no children, add new note in the middle of the list below the sponsoring note
+        // when we have the parent:
+        const parentNote = this.getParent(sponsoringNoteId);
+        if (!parentNote) {
+          throw new Error(
+            `addNoteBelow: Sponsoring note with id ${sponsoringNoteId} has no parent`
+          );
+        }
+        // insert the new note id after the sponsoring note
+        transaction.patchOne(parentNote._id, (note) => {
+          // get index of the sponsoring note in the children array
+          const index = note.childrenIds.indexOf(sponsoringNoteId);
+          return {
+            childrenIds: [
+              ...note.childrenIds.slice(0, index + 1),
+              newNote._id,
+              ...note.childrenIds.slice(index + 1),
+            ],
+          };
+        });
+      }
+    });
+  }
+
+  deleteNote(id: string) {
+    this.notesStore.runTransaction((transaction) => {
+      const note = transaction.getOne(id);
+      if (!note) {
+        throw new Error(`deleteNote: Note with id ${id} not found`);
+      }
+
+      const parentNote = this.getParent(id);
+      if (!parentNote) {
+        throw new Error(`deleteNote: Note with id ${id} not found`);
+      }
+      const previousNoteId = this.getPreviousVisibleNoteId(id);
+
+      // Don't delete the last note
+      if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
+        return this;
+      }
+
+      // Don't delete if the note has children
+      if (note.childrenIds.length > 0) {
+        return this;
+      }
+
+      // Remove the reference to the note from the parent note
+      transaction.patchOne(parentNote._id, (note) => ({
+        childrenIds: note.childrenIds.filter((childId) => childId !== id),
+      }));
+
+      // Remove the note from the store
+      transaction.deleteOne(id);
+
+      // Set the focus to the previous note
+      transaction.patchOne(previousNoteId, {
+        needsFocus: true, // TODO move to memory store
+      });
+    });
+  }
+
+  removeNeedsFocus(id: string) {
+    this.notesStore.patchOne(
+      id,
+      {
+        needsFocus: undefined, // TODO move to memory store
+      },
+      "ui-state"
+    );
+  }
+
+  indentNote(id: string) {
+    this.notesStore.runTransaction((transaction) => {
+      const parentNote = this.getParent(id);
+      if (!parentNote) {
+        throw new Error(`indentNote: Note with id ${id} not found`);
+      }
+      const index = parentNote.childrenIds.indexOf(id);
+      if (index === 0) {
+        return this;
+      }
+
+      // remove the note from the children array of the parent
+      transaction.patchOne(parentNote._id, (note) => ({
+        childrenIds: note.childrenIds.filter((childId) => childId !== id),
+      }));
+
+      // insert the note in the children array of the previous note
+      const previousNoteId = parentNote.childrenIds[index - 1];
+      transaction.patchOne(previousNoteId, (note) => ({
+        isExpanded: true,
+        childrenIds: [...note.childrenIds, id],
+      }));
+
+      // set the focus to the note
+      transaction.patchOne(id, {
+        needsFocus: true, // TODO move to memory store
+      });
+    });
+  }
+
+  outdentNote(id: string) {
+    this.notesStore.runTransaction((transaction) => {
+      const parentNote = this.getParent(id);
+      if (!parentNote) {
+        throw new Error(`outdentNote: Note with id ${id} not found`);
+      }
+
+      if (parentNote._id === "ROOT") {
+        return this;
+      }
+
+      const grandParentNote = this.getParent(parentNote._id);
+      if (!grandParentNote) {
+        throw new Error(`outdentNote: Note with id ${id} not found`);
+      }
+
+      // insert the note in the children array of the grandparent
+      transaction.patchOne(grandParentNote._id, (note) => {
+        const index = note.childrenIds.indexOf(parentNote._id);
         return {
           childrenIds: [
             ...note.childrenIds.slice(0, index + 1),
-            newNote._id,
+            id,
             ...note.childrenIds.slice(index + 1),
           ],
         };
       });
-    }
-    return this.newSelf();
-  }
 
-  deleteNote(id: string) {
-    const note = this.notesStore.getOne(id);
-    if (!note) {
-      throw new Error(`deleteNote: Note with id ${id} not found`);
-    }
+      // remove the note from the children array of the parent
+      transaction.patchOne(parentNote._id, (note) => ({
+        childrenIds: note.childrenIds.filter((childId) => childId !== id),
+      }));
 
-    const parentNote = this.getParent(id);
-    if (!parentNote) {
-      throw new Error(`deleteNote: Note with id ${id} not found`);
-    }
-    const previousNoteId = this.getPreviousVisibleNoteId(id);
-
-    // Don't delete the last note
-    if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
-      return this;
-    }
-
-    // Don't delete if the note has children
-    if (note.childrenIds.length > 0) {
-      return this;
-    }
-
-    // Remove the reference to the note from the parent note
-    this.notesStore.patchOne(parentNote._id, (note) => ({
-      childrenIds: note.childrenIds.filter((childId) => childId !== id),
-    }));
-
-    // Remove the note from the store
-    this.notesStore.deleteOne(id);
-
-    // Set the focus to the previous note
-    this.notesStore.patchOne(previousNoteId, {
-      needsFocus: true, // TODO move to memory store
+      // set the focus to the note again
+      transaction.patchOne(id, {
+        needsFocus: true, // TODO move to memory store
+      });
     });
-
-    return this.newSelf();
-  }
-
-  removeNeedsFocus(id: string) {
-    this.notesStore.patchOne(id, {
-      needsFocus: undefined, // TODO move to memory store
-    });
-
-    return this.newSelf();
-  }
-
-  indentNote(id: string) {
-    const parentNote = this.getParent(id);
-    if (!parentNote) {
-      throw new Error(`indentNote: Note with id ${id} not found`);
-    }
-    const index = parentNote.childrenIds.indexOf(id);
-    if (index === 0) {
-      return this;
-    }
-
-    // remove the note from the children array of the parent
-    this.notesStore.patchOne(parentNote._id, (note) => ({
-      childrenIds: note.childrenIds.filter((childId) => childId !== id),
-    }));
-
-    // insert the note in the children array of the previous note
-    const previousNoteId = parentNote.childrenIds[index - 1];
-    this.notesStore.patchOne(previousNoteId, (note) => ({
-      isExpanded: true,
-      childrenIds: [...note.childrenIds, id],
-    }));
-
-    // set the focus to the note
-    this.notesStore.patchOne(id, {
-      needsFocus: true, // TODO move to memory store
-    });
-
-    return this.newSelf();
-  }
-
-  outdentNote(id: string) {
-    const parentNote = this.getParent(id);
-    if (!parentNote) {
-      throw new Error(`outdentNote: Note with id ${id} not found`);
-    }
-
-    if (parentNote._id === "ROOT") {
-      return this;
-    }
-
-    const grandParentNote = this.getParent(parentNote._id);
-    if (!grandParentNote) {
-      throw new Error(`outdentNote: Note with id ${id} not found`);
-    }
-
-    // insert the note in the children array of the grandparent
-    this.notesStore.patchOne(grandParentNote._id, (note) => {
-      const index = note.childrenIds.indexOf(parentNote._id);
-      return {
-        childrenIds: [
-          ...note.childrenIds.slice(0, index + 1),
-          id,
-          ...note.childrenIds.slice(index + 1),
-        ],
-      };
-    });
-
-    // remove the note from the children array of the parent
-    this.notesStore.patchOne(parentNote._id, (note) => ({
-      childrenIds: note.childrenIds.filter((childId) => childId !== id),
-    }));
-
-    // set the focus to the note again
-    this.notesStore.patchOne(id, {
-      needsFocus: true, // TODO move to memory store
-    });
-
-    return this.newSelf();
   }
 
   selectNext(id: string) {
@@ -284,11 +288,13 @@ export class NotesModel {
     if (!nextId) {
       return this;
     }
-    this.notesStore.patchOne(nextId, {
-      needsFocus: true, // TODO move to memory store
-    });
-
-    return this.newSelf();
+    this.notesStore.patchOne(
+      nextId,
+      {
+        needsFocus: true, // TODO move to memory store
+      },
+      "ui-state"
+    );
   }
 
   selectPrevious(id: string) {
@@ -296,26 +302,28 @@ export class NotesModel {
     if (!previousId) {
       return this;
     }
-    this.notesStore.patchOne(previousId, {
-      needsFocus: true, // TODO move to memory store
-    });
-
-    return this.newSelf();
+    this.notesStore.patchOne(
+      previousId,
+      {
+        needsFocus: true, // TODO move to memory store
+      },
+      "ui-state"
+    );
   }
 
   expandNote(id: string) {
-    this.notesStore.patchOne(id, {
-      isExpanded: true,
+    this.notesStore.runTransaction((transaction) => {
+      transaction.patchOne(id, {
+        isExpanded: true,
+      });
     });
-
-    return this.newSelf();
   }
 
   collapseNote(id: string) {
-    this.notesStore.patchOne(id, {
-      isExpanded: false,
+    this.notesStore.runTransaction((transaction) => {
+      transaction.patchOne(id, {
+        isExpanded: false,
+      });
     });
-
-    return this.newSelf();
   }
 }

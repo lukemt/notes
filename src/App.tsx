@@ -1,19 +1,48 @@
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import { Flipper } from "react-flip-toolkit";
 import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
 import { NotesModel } from "./noteModel/NotesModel";
-import { Store } from "./noteModel/Store";
+import { TransactionStore } from "./noteModel/TransactionStore";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
-  const [notesModel, setNotesModel] = useState(() => {
+  const [refresh, setRefresh] = useState(0);
+  const [notesModel, setNotesModel] = useState(null as NotesModel | null);
+
+  useEffect(() => {
     const notes = loadNotes();
-    const notesStore = new Store(notes);
+    const notesStore = new TransactionStore(notes);
     const notesModel = new NotesModel(notesStore);
-    notesModel.subscribeOne(null, () => saveNotes(notesStore.getAll()));
-    return notesModel;
-  });
+    notesStore.addEventListener("transaction", () =>
+      saveNotes(notesStore.getAll())
+    );
+    notesStore.addEventListener("transaction", () =>
+      setRefresh((refresh) => refresh + 1)
+    );
+    notesStore.addEventListener("external-update", () =>
+      setRefresh((refresh) => refresh + 1)
+    );
+    notesStore.addEventListener("ui-state", () =>
+      setRefresh((refresh) => refresh + 1)
+    );
+    document.addEventListener("keydown", (e) => {
+      if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
+        e.preventDefault();
+        if (e.shiftKey) {
+          notesStore.redo();
+        } else {
+          notesStore.undo();
+        }
+      }
+    });
+
+    setNotesModel(notesModel);
+  }, []);
+
+  if (!notesModel) {
+    return null;
+  }
 
   const rootNote = notesModel.getOne("ROOT")!;
 
@@ -37,37 +66,25 @@ export default function App() {
         />
       </header>
       <main className="max-w-md mx-auto my-20">
-        <Flipper flipKey={notesModel}>
+        <Flipper flipKey={refresh}>
           <ul>
             {rootNote.childrenIds.map((id) => (
               <NotesComponent
                 key={id}
                 notesModel={notesModel}
                 id={id}
-                onUpdateNote={(id, text) =>
-                  setNotesModel(notesModel.updateNoteText(id, text))
-                }
+                onUpdateNote={(id, text) => notesModel.updateNoteText(id, text)}
                 onAddNote={(sponsoringNoteId) =>
-                  setNotesModel(notesModel.addNoteBelow(sponsoringNoteId))
+                  notesModel.addNoteBelow(sponsoringNoteId)
                 }
-                onDeleteNote={(id) => setNotesModel(notesModel.deleteNote(id))}
-                onFocusTriggered={(id) =>
-                  setNotesModel(notesModel.removeNeedsFocus(id))
-                }
-                onIndentNote={(id) => setNotesModel(notesModel.indentNote(id))}
-                onOutdentNote={(id) =>
-                  setNotesModel(notesModel.outdentNote(id))
-                }
-                onSelectPreviousNote={(id) =>
-                  setNotesModel(notesModel.selectPrevious(id))
-                }
-                onSelectNextNote={(id) =>
-                  setNotesModel(notesModel.selectNext(id))
-                }
-                onExpandNote={(id) => setNotesModel(notesModel.expandNote(id))}
-                onCollapseNote={(id) =>
-                  setNotesModel(notesModel.collapseNote(id))
-                }
+                onDeleteNote={(id) => notesModel.deleteNote(id)}
+                onFocusTriggered={(id) => notesModel.removeNeedsFocus(id)}
+                onIndentNote={(id) => notesModel.indentNote(id)}
+                onOutdentNote={(id) => notesModel.outdentNote(id)}
+                onSelectPreviousNote={(id) => notesModel.selectPrevious(id)}
+                onSelectNextNote={(id) => notesModel.selectNext(id)}
+                onExpandNote={(id) => notesModel.expandNote(id)}
+                onCollapseNote={(id) => notesModel.collapseNote(id)}
               />
             ))}
           </ul>
