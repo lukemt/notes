@@ -1,12 +1,19 @@
 import { nanoid } from "nanoid";
-import { TransactionStore } from "./TransactionStore";
+import { SubscribableStore } from "./SubscribableStore";
+import { TransactionManager } from "./TransactionManager";
 import { Note } from "./types";
 
 export class NotesModel {
-  private notesStore: TransactionStore<Note>;
+  private notesStore: SubscribableStore<Note>;
+  private transactionManager: TransactionManager<Note>;
 
-  constructor(notesStore: TransactionStore<Note>) {
+  constructor(notesStore: SubscribableStore<Note>) {
     this.notesStore = notesStore;
+    this.transactionManager = new TransactionManager(notesStore);
+  }
+
+  getTransactionManager() {
+    return this.transactionManager;
   }
 
   getOne(id: string): Note | null {
@@ -112,13 +119,13 @@ export class NotesModel {
     if (note.text === newText) {
       return;
     }
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       transaction.patchOne(noteId, { text: newText });
     });
   }
 
   addNoteBelow(sponsoringNoteId: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       const sponsoringNote = transaction.getOne(sponsoringNoteId);
       if (!sponsoringNote) {
         throw new Error(
@@ -166,7 +173,7 @@ export class NotesModel {
   }
 
   deleteNote(id: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       const note = transaction.getOne(id);
       if (!note) {
         throw new Error(`deleteNote: Note with id ${id} not found`);
@@ -214,7 +221,7 @@ export class NotesModel {
   }
 
   indentNote(id: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       const parentNote = this.getParent(id);
       if (!parentNote) {
         throw new Error(`indentNote: Note with id ${id} not found`);
@@ -244,7 +251,7 @@ export class NotesModel {
   }
 
   outdentNote(id: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       const parentNote = this.getParent(id);
       if (!parentNote) {
         throw new Error(`outdentNote: Note with id ${id} not found`);
@@ -312,7 +319,7 @@ export class NotesModel {
   }
 
   expandNote(id: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       transaction.patchOne(id, {
         isExpanded: true,
       });
@@ -320,7 +327,7 @@ export class NotesModel {
   }
 
   collapseNote(id: string) {
-    this.notesStore.runTransaction((transaction) => {
+    this.transactionManager.runTransaction((transaction) => {
       transaction.patchOne(id, {
         isExpanded: false,
       });

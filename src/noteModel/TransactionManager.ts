@@ -1,23 +1,25 @@
 import { SubscribableStore } from "./SubscribableStore";
 import { Transaction } from "./Transaction";
 
-// TODO: Move to a seperate class named TransactionManager
-export class TransactionStore<
-  Document extends { _id: string }
-> extends SubscribableStore<Document> {
+export class TransactionManager<Document extends { _id: string }> {
+  private store: SubscribableStore<Document>;
   private pastTransactions: Transaction<Document>[] = [];
   private futureTransactions: Transaction<Document>[] = [];
+
+  public constructor(store: SubscribableStore<Document>) {
+    this.store = store;
+  }
 
   public runTransaction(
     callback: (transaction: Transaction<Document>) => void
   ) {
-    const transaction = new Transaction(this);
+    const transaction = new Transaction(this.store);
     try {
       callback(transaction);
       transaction.redo();
       this.pastTransactions.push(transaction);
       this.futureTransactions = [];
-      this.emitEvent({
+      this.store.emitEvent({
         type: "transaction",
         transaction,
       });
@@ -32,7 +34,7 @@ export class TransactionStore<
     if (transaction) {
       this.pastTransactions.push(transaction);
       transaction.redo();
-      this.emitEvent({
+      this.store.emitEvent({
         type: "transaction",
         transaction,
       });
@@ -44,7 +46,7 @@ export class TransactionStore<
     if (transaction) {
       this.futureTransactions.push(transaction);
       transaction.undo();
-      this.emitEvent({
+      this.store.emitEvent({
         type: "transaction",
         transaction,
       });

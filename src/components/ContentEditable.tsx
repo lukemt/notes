@@ -65,6 +65,7 @@ export default function ContentEditable({
         onNewValue(value);
       }
     };
+    // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
   // needs focus

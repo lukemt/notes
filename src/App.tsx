@@ -3,7 +3,7 @@ import { Flipper } from "react-flip-toolkit";
 import ContentEditable from "./components/ContentEditable";
 import NotesComponent from "./components/NotesComponent";
 import { NotesModel } from "./noteModel/NotesModel";
-import { TransactionStore } from "./noteModel/TransactionStore";
+import { SubscribableStore } from "./noteModel/SubscribableStore";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
@@ -12,7 +12,7 @@ export default function App() {
 
   useEffect(() => {
     const notes = loadNotes();
-    const notesStore = new TransactionStore(notes);
+    const notesStore = new SubscribableStore(notes);
     const notesModel = new NotesModel(notesStore);
     notesStore.addEventListener("transaction", () =>
       saveNotes(notesStore.getAll())
@@ -30,9 +30,9 @@ export default function App() {
       if (e.key === "z" && (e.ctrlKey || e.metaKey)) {
         e.preventDefault();
         if (e.shiftKey) {
-          notesStore.redo();
+          notesModel.getTransactionManager().redo();
         } else {
-          notesStore.undo();
+          notesModel.getTransactionManager().undo();
         }
       }
     });

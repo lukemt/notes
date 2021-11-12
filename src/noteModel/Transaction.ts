@@ -1,4 +1,4 @@
-import { TransactionStore } from "./TransactionStore";
+import { SubscribableStore } from "./SubscribableStore";
 
 type Entry = {
   id: string;
@@ -8,9 +8,9 @@ type Entry = {
 
 export class Transaction<Document extends { _id: string }> {
   private entries: Entry[] = [];
-  private store: TransactionStore<Document>;
+  private store: SubscribableStore<Document>;
 
-  constructor(store: TransactionStore<Document>) {
+  constructor(store: SubscribableStore<Document>) {
     this.store = store;
   }
 
