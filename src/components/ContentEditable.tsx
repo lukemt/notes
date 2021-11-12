@@ -1,4 +1,5 @@
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useRef } from "react";
+import debounce from "lodash/debounce";
 
 interface ContentEditableProps {
   defaultValue: string;
@@ -31,7 +32,6 @@ export default function ContentEditable({
   onCollapse,
   className,
 }: ContentEditableProps) {
-  const [isFocus, setIsFocus] = useState(false);
   const ref = useRef<HTMLDivElement>(null);
 
   function setValue(value: string) {
@@ -39,21 +39,49 @@ export default function ContentEditable({
   }
 
   useEffect(() => {
-    if (!isFocus) {
-      setValue(defaultValue);
-    }
-  }, [isFocus, defaultValue]);
+    setValue(defaultValue);
+  }, [defaultValue]);
+
+  useEffect(() => {
+    // Save the text on unmount, if not done already
+    // This is a precaution to avoid data loss
+    // It should not happen in practice
+    const refCurrent = ref.current;
+    return () => {
+      if (!refCurrent) {
+        console.error("ContentEditable: ref is null");
+        return;
+      }
+      const value = refCurrent.textContent;
+      if (typeof value !== "string") {
+        console.error("ContentEditable: ref.textContent is not a string");
+        return;
+      }
+
+      if (value !== defaultValue) {
+        console.warn(
+          `ContentEditable: value is not equal to defaultValue. Saving the text now...`
+        );
+        onNewValue(value);
+      }
+    };
+  }, []);
 
   // needs focus
   useEffect(() => {
-    if (!isFocus && needsFocus) {
-      if (ref.current) {
+    if (ref.current) {
+      if (needsFocus) {
         ref.current.focus();
         setCaretToEnd(ref.current);
         onFocusTriggered();
       }
     }
-  }, [needsFocus, isFocus, onFocusTriggered]);
+  }, [needsFocus, onFocusTriggered]);
+
+  function save() {
+    if (ref.current) onNewValue(ref.current.textContent ?? "");
+  }
+  const debouncedSave = debounce(save, 1000);
 
   return (
     <div
@@ -62,42 +90,45 @@ export default function ContentEditable({
       contentEditable={true}
       spellCheck={true}
       ref={ref}
-      onInput={handleInput}
       onBlur={handleBlur}
-      onFocus={handleFocus}
+      onInput={handleInput}
       onKeyDown={handleKeyDown}
     />
   );
 
   function handleInput(e: React.FormEvent<HTMLDivElement>) {
-    const div = e.target as HTMLDivElement;
-    onNewValue(div.textContent ?? "");
+    debouncedSave();
   }
 
+  function handleBlur(e: React.FormEvent<HTMLDivElement>) {
+    save();
+  }
   function handleKeyDown(e: React.KeyboardEvent<HTMLDivElement>) {
     switch (e.key) {
       case "Enter": {
         if (!e.shiftKey) {
-          onEnter();
           e.preventDefault();
+          save();
+          onEnter();
         }
         break;
       }
 
       case "Backspace": {
         if (ref.current?.textContent === "") {
+          save();
           onDelete();
         }
         break;
       }
 
       case "Tab": {
+        e.preventDefault();
+        save();
         if (e.shiftKey) {
           onOutdent();
-          e.preventDefault();
         } else {
           onIndent();
-          e.preventDefault();
         }
         break;
       }
@@ -112,6 +143,7 @@ export default function ContentEditable({
         //     onSelectPrevious();
         //   }
         // }
+        save();
         if (e.ctrlKey || e.metaKey) {
           onCollapse();
         } else {
@@ -130,6 +162,7 @@ export default function ContentEditable({
         //     onSelectNext();
         //   }
         // }
+        save();
         if (e.ctrlKey || e.metaKey) {
           onExpand();
         } else {
@@ -138,20 +171,6 @@ export default function ContentEditable({
         break;
       }
     }
-  }
-
-  function handleFocus(e: React.FormEvent<HTMLDivElement>) {
-    setIsFocus(true);
-  }
-
-  function handleBlur(e: React.FormEvent<HTMLDivElement>) {
-    const div = e.target as HTMLDivElement;
-    if ((div.textContent ?? "") !== defaultValue)
-      console.error("A ContentEditable seems to be wrongly updated", {
-        divContent: div.textContent ?? "",
-        defaultValue: defaultValue,
-      });
-    setIsFocus(false);
   }
 }
 
