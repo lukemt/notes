@@ -12,6 +12,7 @@
     "@types/node": "^12.20.33",
     "@types/react": "^17.0.30",
     "@types/react-dom": "^17.0.9",
+    "classnames": "^2.3.1",
     "history": "^5.1.0",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.30",
