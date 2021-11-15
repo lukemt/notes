@@ -20,6 +20,7 @@ export default function ExpandIcon({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
+          <title>Collapse</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"
@@ -42,6 +43,7 @@ export default function ExpandIcon({
           viewBox="0 0 24 24"
           stroke="currentColor"
         >
+          <title>Expand</title>
           <path
             strokeLinecap="round"
             strokeLinejoin="round"

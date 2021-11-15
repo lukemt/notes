@@ -124,7 +124,7 @@ export class NotesModel {
     });
   }
 
-  addNoteBelow(sponsoringNoteId: string) {
+  addNoteBelow(sponsoringNoteId: string, alwaysAsChild: boolean) {
     this.transactionManager.runTransaction((transaction) => {
       const sponsoringNote = transaction.getOne(sponsoringNoteId);
       if (!sponsoringNote) {
@@ -143,7 +143,10 @@ export class NotesModel {
       transaction.addOne(newNote);
 
       // if the sponsoring note has expanded children, add new note to the top of the children
-      if (sponsoringNote.isExpanded && sponsoringNote.childrenIds.length > 0) {
+      if (
+        alwaysAsChild ||
+        (sponsoringNote.isExpanded && sponsoringNote.childrenIds.length > 0)
+      ) {
         transaction.patchOne(sponsoringNoteId, {
           childrenIds: [newNote._id, ...sponsoringNote.childrenIds],
         });
@@ -331,6 +334,14 @@ export class NotesModel {
       transaction.patchOne(id, {
         isExpanded: false,
       });
+    });
+  }
+
+  toggleIsPage(id: string) {
+    this.transactionManager.runTransaction((transaction) => {
+      transaction.patchOne(id, (note) => ({
+        isPage: !note.isPage,
+      }));
     });
   }
 }
