@@ -6,7 +6,7 @@ import { SubscribableStore } from "./noteModel/SubscribableStore";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";
 
 export default function App() {
-  const [refresh, setRefresh] = useState(0);
+  const [, setRefresh] = useState(0);
   const [notesModel, setNotesModel] = useState(null as NotesModel | null);
 
   useEffect(() => {
@@ -42,8 +42,6 @@ export default function App() {
   if (!notesModel) {
     return null;
   }
-
-  const rootNote = notesModel.getOne("ROOT")!;
 
   return (
     <BrowserRouter>
