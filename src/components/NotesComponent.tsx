@@ -2,50 +2,32 @@ import { NotesModel } from "../noteModel/NotesModel";
 import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";
 import ExpandIcon from "./ExpandButton";
-import PageIconButton from "./PageIconButton";
+import PageLink from "./PageLink";
 import NoteMenu from "./NoteMenu";
 
 interface NoteProps {
   notesModel: NotesModel;
   id: string;
-  onUpdateNote: (id: string, value: string) => void;
-  onAddNote: (id: string) => void;
-  onDeleteNote: (id: string) => void;
-  onFocusTriggered: (id: string) => void;
-  onIndentNote: (id: string) => void;
-  onOutdentNote: (id: string) => void;
-  onSelectPreviousNote: (id: string) => void;
-  onSelectNextNote: (id: string) => void;
-  onExpandNote: (id: string) => void;
-  onCollapseNote: (id: string) => void;
-  onToggleIsPage: (id: string) => void;
 }
 
-export default function NotesComponent({
-  notesModel,
-  id,
-  onUpdateNote,
-  onAddNote,
-  onDeleteNote,
-  onFocusTriggered,
-  onIndentNote,
-  onOutdentNote,
-  onSelectPreviousNote,
-  onSelectNextNote,
-  onExpandNote,
-  onCollapseNote,
-  onToggleIsPage,
-}: NoteProps) {
+export default function NotesComponent({ notesModel, id }: NoteProps) {
   const note = notesModel.getOne(id);
 
   if (!note) {
     console.error("Note not found", id);
     return null;
   }
-
   return (
     <li>
-      <Flipped flipId={note._id}>
+      <Flipped
+        flipId={note._id}
+        onAppear={(element) => {
+          element.animate([{ opacity: 0 }, { opacity: 1 }], {
+            duration: 500,
+            fill: "forwards",
+          });
+        }}
+      >
         <div
           className={
             "flex items-center relative group focus-within:ring-2 ring-blue-600 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
@@ -56,33 +38,33 @@ export default function NotesComponent({
         >
           <NoteMenu
             isPage={note.isPage ?? false}
-            onToggleIsPage={() => onToggleIsPage(note._id)}
+            onToggleIsPage={() => notesModel.toggleIsPage(note._id)}
           />
           {note.isPage ? (
-            <PageIconButton onClick={() => alert("noce")} />
+            <PageLink to={`/note/${note._id}`} />
           ) : (
             <div className="w-5" />
           )}
           <ContentEditable
-            className="flex-1 py-3 outline-none"
+            className="flex-1 py-3 outline-none tracking-wide"
             defaultValue={note.text}
             needsFocus={note.needsFocus}
-            onNewValue={(value) => onUpdateNote(note._id, value)}
-            onEnter={() => onAddNote(note._id)}
-            onDelete={() => onDeleteNote(note._id)}
-            onFocusTriggered={() => onFocusTriggered(note._id)}
-            onIndent={() => onIndentNote(note._id)}
-            onOutdent={() => onOutdentNote(note._id)}
-            onSelectPrevious={() => onSelectPreviousNote(note._id)}
-            onSelectNext={() => onSelectNextNote(note._id)}
-            onExpand={() => onExpandNote(note._id)}
-            onCollapse={() => onCollapseNote(note._id)}
+            onNewValue={(value) => notesModel.updateNoteText(note._id, value)}
+            onEnter={() => notesModel.addNoteBelow(note._id, false)}
+            onDelete={() => notesModel.deleteNote(note._id)}
+            onFocusTriggered={() => notesModel.removeNeedsFocus(note._id)}
+            onIndent={() => notesModel.indentNote(note._id)}
+            onOutdent={() => notesModel.outdentNote(note._id)}
+            onSelectPrevious={() => notesModel.selectPrevious(note._id)}
+            onSelectNext={() => notesModel.selectNext(note._id)}
+            onExpand={() => notesModel.expandNote(note._id)}
+            onCollapse={() => notesModel.collapseNote(note._id)}
           />
           {note.childrenIds.length > 0 && (
             <ExpandIcon
               isExpanded={note.isExpanded}
-              onExpand={() => onExpandNote(note._id)}
-              onCollapse={() => onCollapseNote(note._id)}
+              onExpand={() => notesModel.expandNote(note._id)}
+              onCollapse={() => notesModel.collapseNote(note._id)}
             />
           )}
         </div>
@@ -94,17 +76,6 @@ export default function NotesComponent({
               key={childId}
               notesModel={notesModel}
               id={childId}
-              onUpdateNote={onUpdateNote}
-              onAddNote={onAddNote}
-              onDeleteNote={onDeleteNote}
-              onFocusTriggered={onFocusTriggered}
-              onIndentNote={onIndentNote}
-              onOutdentNote={onOutdentNote}
-              onSelectPreviousNote={onSelectPreviousNote}
-              onSelectNextNote={onSelectNextNote}
-              onExpandNote={onExpandNote}
-              onCollapseNote={onCollapseNote}
-              onToggleIsPage={onToggleIsPage}
             />
           ))}
         </ul>
