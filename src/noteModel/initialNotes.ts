@@ -62,7 +62,7 @@ export const initialNotes: Note[] = [
     _id: "F23J4bS6dmM46VxaKTA6_",
     text: "Isn't this fun?",
     childrenIds: ["jAwojYlHuHWT6StVeq-Ab"],
-    isExpanded: false,
+    isExpanded: true,
     isPage: true,
   },
   {
@@ -73,7 +73,7 @@ export const initialNotes: Note[] = [
   },
   {
     _id: "fzYIQVGPfCG0_PepGu9yt",
-    text: "some more hidden notes",
+    text: "some more hidden notes hiding here...",
     childrenIds: ["YtrXgja7v61bwTDffPS3k"],
     isExpanded: false,
     isPage: false,
