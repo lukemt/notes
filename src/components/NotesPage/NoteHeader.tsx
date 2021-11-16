@@ -1,11 +1,11 @@
 import classNames from "classnames";
 import { Flipped } from "react-flip-toolkit";
-import { NotesModel } from "../noteModel/NotesModel";
-import { Note } from "../noteModel/types";
-import BackButton from "./BackButton";
-import ContentEditable from "./ContentEditable";
+import { NotesModel } from "../../noteModel/NotesModel";
+import { Note } from "../../noteModel/types";
+import BackButton from "./Note/BackButton";
+import ContentEditable from "./Note/ContentEditable";
 
-export function Header({
+export function NoteHeader({
   mainNote,
   notesModel,
 }: {

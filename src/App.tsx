@@ -1,6 +1,6 @@
 import { useEffect, useState } from "react";
 import { BrowserRouter, Routes, Route } from "react-router-dom";
-import NotesPage from "./components/NotesPage";
+import NotesPage from "./components/NotesPage/NotesPage";
 import { NotesModel } from "./noteModel/NotesModel";
 import { SubscribableStore } from "./noteModel/SubscribableStore";
 import { loadNotes, saveNotes } from "./utils/autoSaveSingleton";

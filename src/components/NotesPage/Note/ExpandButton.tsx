@@ -1,12 +1,14 @@
-export default function ExpandIcon({
-  isExpanded,
-  onExpand,
-  onCollapse,
-}: {
+interface ExpandButtonProps {
   isExpanded: boolean;
   onExpand: () => void;
   onCollapse: () => void;
-}) {
+}
+
+export default function ExpandButton({
+  isExpanded,
+  onExpand,
+  onCollapse,
+}: ExpandButtonProps) {
   if (isExpanded) {
     return (
       <button
