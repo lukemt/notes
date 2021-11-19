@@ -35,7 +35,8 @@ export default function ContentEditable({
   const ref = useRef<HTMLDivElement>(null);
 
   function setValue(value: string) {
-    if (ref.current) ref.current.textContent = value;
+    if (ref.current && ref.current.textContent !== value)
+      ref.current.textContent = value;
   }
 
   useEffect(() => {
