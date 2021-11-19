@@ -1,3 +1,5 @@
+import tw from "tailwind-styled-components";
+
 interface ExpandButtonProps {
   isExpanded: boolean;
   onExpand: () => void;
@@ -11,10 +13,7 @@ export default function ExpandButton({
 }: ExpandButtonProps) {
   if (isExpanded) {
     return (
-      <button
-        className="p-4 opacity-0 group-hover:opacity-100 transition text-gray-600"
-        onClick={onCollapse}
-      >
+      <TwCollapseButton onClick={onCollapse}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4"
@@ -30,14 +29,11 @@ export default function ExpandButton({
             d="M5 15l7-7 7 7"
           />
         </svg>
-      </button>
+      </TwCollapseButton>
     );
   } else {
     return (
-      <button
-        className="p-4 opacity-100 group-hover:opacity-100 group-focus:opacity-100 transition text-gray-600"
-        onClick={onExpand}
-      >
+      <TwExpandButton onClick={onExpand}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4"
@@ -53,7 +49,24 @@ export default function ExpandButton({
             d="M19 9l-7 7-7-7"
           />
         </svg>
-      </button>
+      </TwExpandButton>
     );
   }
 }
+
+const TwCollapseButton = tw.button`
+  p-4
+  opacity-0
+  group-hover:opacity-100
+  transition
+  text-gray-600
+`;
+
+const TwExpandButton = tw.button`
+  p-4
+  opacity-100
+  group-hover:opacity-100
+  group-focus:opacity-100
+  transition
+  text-gray-600
+`;

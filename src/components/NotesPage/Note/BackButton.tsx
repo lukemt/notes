@@ -1,20 +1,10 @@
 import { useNavigate } from "react-router-dom";
-import classNames from "classnames";
+import tw from "tailwind-styled-components";
 
 export default function BackButton() {
   const navigate = useNavigate();
   return (
-    <button
-      className={classNames(
-        "p-2",
-        "transition",
-        "ease-out",
-        "hover:scale-125",
-        "text-blue-900",
-        "dark:text-blue-200"
-      )}
-      onClick={() => navigate(-1)}
-    >
+    <TwButton onClick={() => navigate(-1)}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-6 w-6"
@@ -28,6 +18,15 @@ export default function BackButton() {
           clipRule="evenodd"
         />
       </svg>
-    </button>
+    </TwButton>
   );
 }
+
+const TwButton = tw.button`
+  p-2
+  transition
+  ease-out
+  hover:scale-125
+  text-blue-900
+  dark:text-blue-50
+`;

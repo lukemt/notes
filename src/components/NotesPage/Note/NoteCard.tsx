@@ -1,3 +1,4 @@
+import tw from "tailwind-styled-components";
 import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";
 import ExpandButton from "./ExpandButton";
@@ -22,13 +23,8 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
         });
       }}
     >
-      <div
-        className={
-          "flex items-center relative group focus-within:ring-2 ring-blue-600 m-3 rounded-xl shadow-lg bg-gradient-to-br from-white to-blue-50 dark:from-blue-900 dark:to-green-800 " +
-          (!note.isExpanded && note.childrenIds.length > 0
-            ? "border-l-4 border-blue-700 dark:border-green-600"
-            : "")
-        }
+      <TwNoteCardDiv
+        hasHiddenChildren={!note.isExpanded && note.childrenIds.length > 0}
       >
         <NoteMenu
           isPage={note.isPage ?? false}
@@ -39,8 +35,7 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
         ) : (
           <div className="w-5" />
         )}
-        <ContentEditable
-          className="flex-1 py-3 outline-none tracking-wide"
+        <TwContentEditable
           defaultValue={note.text}
           needsFocus={note.needsFocus}
           onNewValue={(value) => notesModel.updateNoteText(note._id, value)}
@@ -61,7 +56,38 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
             onCollapse={() => notesModel.collapseNote(note._id)}
           />
         )}
-      </div>
+      </TwNoteCardDiv>
     </Flipped>
   );
 }
+
+const TwNoteCardDiv = tw.div<{ hasHiddenChildren: boolean }>`
+          flex
+          items-center
+          relative
+          m-3
+      
+          group
+          focus-within:ring-2
+          ring-blue-600
+          
+          rounded-xl
+          shadow-lg
+          bg-gradient-to-br
+          from-white
+          to-blue-50
+          dark:from-blue-900
+          dark:to-green-800
+
+          ${({ hasHiddenChildren }) =>
+            hasHiddenChildren
+              ? "border-l-4 border-blue-700 dark:border-green-600"
+              : ""}
+`;
+
+const TwContentEditable = tw(ContentEditable)`
+  flex-1
+  py-3
+  outline-none
+  tracking-wide
+`;

@@ -1,4 +1,4 @@
-import classNames from "classnames";
+import tw from "tailwind-styled-components";
 import { Flipped } from "react-flip-toolkit";
 import { NotesModel } from "../../noteModel/NotesModel";
 import { Note } from "../../noteModel/types";
@@ -12,47 +12,12 @@ export function NoteHeader({
   mainNote: Note;
   notesModel: NotesModel;
 }) {
-  const bgClassNames = [
-    "bg-gradient-to-br",
-    "from-white",
-    "to-blue-50",
-    "dark:from-gray-900",
-    "dark:to-blue-900",
-  ];
-
   return (
-    <header
-      className={classNames(
-        "sticky", //
-        "top-0",
-        "inset-x-0",
-        "z-10",
-        "shadow-md",
-        bgClassNames
-      )}
-    >
+    <TwHeader>
       <Flipped flipId={mainNote._id}>
-        <div
-          className={classNames(
-            "flex",
-            "max-w-md",
-            "mx-auto",
-            "p-1",
-            "pl-3",
-            "rounded-2xl",
-            bgClassNames
-          )}
-        >
+        <TwFlexDiv>
           {mainNote._id !== "ROOT" && <BackButton />}
-          <ContentEditable
-            className={classNames(
-              "flex-1",
-              "p-3",
-              "tracking-widest",
-              "rounded-xl",
-              "text-3xl",
-              "text-blue-900"
-            )}
+          <TwContentEditable
             defaultValue={mainNote.text}
             needsFocus={false}
             onNewValue={(value) =>
@@ -70,8 +35,44 @@ export function NoteHeader({
             onExpand={() => {}}
             onCollapse={() => {}}
           />
-        </div>
+        </TwFlexDiv>
       </Flipped>
-    </header>
+    </TwHeader>
   );
 }
+
+const background = () => `
+  bg-gradient-to-br
+  from-white
+  to-blue-50
+  dark:from-gray-900
+  dark:to-blue-900
+`;
+
+const TwHeader = tw.header`
+  sticky
+  top-0
+  inset-x-0
+  z-10
+  shadow-md
+  ${background}
+`;
+
+const TwFlexDiv = tw.div`
+  flex
+  max-w-md
+  mx-auto
+  p-1
+  pl-3
+  rounded-2xl
+  ${background}
+`;
+
+const TwContentEditable = tw(ContentEditable)`
+  flex-1
+  p-3
+  tracking-widest
+  rounded-xl
+  text-3xl
+  text-blue-900
+`;

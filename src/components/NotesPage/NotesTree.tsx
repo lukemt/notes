@@ -1,3 +1,4 @@
+import tw from "tailwind-styled-components";
 import { NotesModel } from "../../noteModel/NotesModel";
 import NoteCard from "./Note/NoteCard";
 
@@ -17,12 +18,16 @@ export default function NotesTree({ notesModel, id }: NotesTreeProps) {
     <li>
       <NoteCard note={note} notesModel={notesModel} />
       {note.isExpanded && note.childrenIds.length > 0 && (
-        <ul className="pl-10">
+        <TwUl>
           {note.childrenIds.map((childId) => (
             <NotesTree key={childId} notesModel={notesModel} id={childId} />
           ))}
-        </ul>
+        </TwUl>
       )}
     </li>
   );
 }
+
+const TwUl = tw.ul`
+  pl-10
+`;

@@ -1,5 +1,5 @@
-import classNames from "classnames";
 import { useEffect } from "react";
+import tw from "tailwind-styled-components";
 import { Flipper } from "react-flip-toolkit";
 import { useLocation, useParams } from "react-router-dom";
 import { NotesModel } from "../../noteModel/NotesModel";
@@ -29,13 +29,19 @@ export default function NotesPage({ notesModel }: NotesPageProps) {
   return (
     <Flipper flipKey={Math.random()}>
       <NoteHeader mainNote={mainNote} notesModel={notesModel} />
-      <main className={classNames("max-w-md", "mx-auto", "my-0")}>
+      <TwMain>
         <ul>
           {mainNote.childrenIds.map((id) => (
             <NotesTree key={id} notesModel={notesModel} id={id} />
           ))}
         </ul>
-      </main>
+      </TwMain>
     </Flipper>
   );
 }
+
+const TwMain = tw.main`
+  max-w-md
+  mx-auto
+  my-0
+`;
