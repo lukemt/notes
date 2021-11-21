@@ -6,6 +6,7 @@ import PageLink from "./PageLink";
 import NoteMenu from "./NoteMenu";
 import { Note } from "../../../noteModel/types";
 import { NotesModel } from "../../../noteModel/NotesModel";
+import { twBaseColor } from "../../../utils/twIncludeAllColors";
 
 interface NoteCardProps {
   note: Note;
@@ -24,18 +25,20 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
       }}
     >
       <TwNoteCardDiv
-        hasHiddenChildren={!note.isExpanded && note.childrenIds.length > 0}
+        $hasHiddenChildren={!note.isExpanded && note.childrenIds.length > 0}
+        $baseColor={note.baseColor}
       >
         <NoteMenu
           isPage={note.isPage ?? false}
           onToggleIsPage={() => notesModel.toggleIsPage(note._id)}
         />
         {note.isPage ? (
-          <PageLink to={`/note/${note._id}`} />
+          <PageLink to={`/note/${note._id}`} baseColor={note.baseColor} />
         ) : (
           <div className="w-5" />
         )}
         <TwContentEditable
+          $baseColor={note.baseColor}
           defaultValue={note.text}
           needsFocus={note.needsFocus}
           onNewValue={(value) => notesModel.updateNoteText(note._id, value)}
@@ -61,28 +64,35 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
   );
 }
 
-const TwNoteCardDiv = tw.div<{ hasHiddenChildren: boolean }>`
-          flex
-          items-center
-          relative
-          m-3
-      
-          group
-          focus-within:ring-2
-          ring-blue-600
-          
-          rounded-xl
-          shadow-lg
-          bg-gradient-to-br
-          from-white
-          to-blue-50
-          dark:from-blue-900
-          dark:to-green-800
+const TwNoteCardDiv = tw.div<{
+  $hasHiddenChildren: boolean;
+  $baseColor?: string;
+}>`
+  flex
+  items-center
+  relative
+  m-3
 
-          ${({ hasHiddenChildren }) =>
-            hasHiddenChildren
-              ? "border-l-4 border-blue-700 dark:border-green-600"
-              : ""}
+  group
+  focus-within:ring-2
+  ${twBaseColor("ring-$baseColor-600")}
+  
+  rounded-xl
+  shadow-lg
+  bg-gradient-to-br
+  from-white
+  ${twBaseColor("to-$baseColor-50")}
+  ${twBaseColor("dark:from-$baseColor-900")}
+  dark:to-gray-800
+
+  ${({ $hasHiddenChildren, $baseColor }) =>
+    $hasHiddenChildren
+      ? `
+        border-l-4
+        ${twBaseColor("border-$baseColor-700")({ $baseColor })}
+        ${twBaseColor("dark:border-$baseColor-400")({ $baseColor })}
+      `
+      : ""}
 `;
 
 const TwContentEditable = tw(ContentEditable)`
@@ -90,4 +100,6 @@ const TwContentEditable = tw(ContentEditable)`
   py-3
   outline-none
   tracking-wide
+  ${twBaseColor("text-$baseColor-900")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;

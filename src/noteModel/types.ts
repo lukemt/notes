@@ -5,4 +5,5 @@ export interface Note {
   isExpanded: boolean;
   needsFocus?: true;
   isPage?: boolean;
+  baseColor?: string;
 }

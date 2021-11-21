@@ -1,13 +1,15 @@
 import { Link } from "react-router-dom";
 import tw from "tailwind-styled-components";
+import { twBaseColor } from "../../../utils/twIncludeAllColors";
 
 interface PageLinkProps {
   to: string;
+  baseColor?: string;
 }
 
-export default function PageLink({ to }: PageLinkProps) {
+export default function PageLink({ to, baseColor }: PageLinkProps) {
   return (
-    <TwLink to={to}>
+    <TwLink to={to} $baseColor={baseColor}>
       <TwSvg
         xmlns="http://www.w3.org/2000/svg"
         viewBox="0 0 20 20"
@@ -24,13 +26,13 @@ export default function PageLink({ to }: PageLinkProps) {
   );
 }
 
-const TwLink = tw(Link)`
+const TwLink = tw(Link)<{ $baseColor?: string }>`
     p-3
     transition
     ease-out
     hover:scale-125
-    text-blue-700
-    dark:text-blue-200
+    ${twBaseColor("text-$baseColor-700")}
+    ${twBaseColor("dark:text-$baseColor-200")}
 `;
 
 const TwSvg = tw.svg`

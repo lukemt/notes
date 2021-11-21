@@ -4,6 +4,7 @@ import { NotesModel } from "../../noteModel/NotesModel";
 import { Note } from "../../noteModel/types";
 import BackButton from "./Note/BackButton";
 import ContentEditable from "./Note/ContentEditable";
+import { twBaseColor } from "../../utils/twIncludeAllColors";
 
 export function NoteHeader({
   mainNote,
@@ -13,11 +14,14 @@ export function NoteHeader({
   notesModel: NotesModel;
 }) {
   return (
-    <TwHeader>
+    <TwHeader $baseColor={mainNote.baseColor}>
       <Flipped flipId={mainNote._id}>
         <TwFlexDiv>
-          {mainNote._id !== "ROOT" && <BackButton />}
+          {mainNote._id !== "ROOT" && (
+            <BackButton baseColor={mainNote.baseColor} />
+          )}
           <TwContentEditable
+            $baseColor={mainNote.baseColor}
             defaultValue={mainNote.text}
             needsFocus={false}
             onNewValue={(value) =>
@@ -41,12 +45,12 @@ export function NoteHeader({
   );
 }
 
-const background = () => `
+const background = ({ $baseColor }: { $baseColor?: string }) => `
   bg-gradient-to-br
   from-white
-  to-blue-50
+  ${twBaseColor("to-$baseColor-50")({ $baseColor })}
   dark:from-gray-900
-  dark:to-blue-900
+  ${twBaseColor("dark:to-$baseColor-900")({ $baseColor })}
 `;
 
 const TwHeader = tw.header`
@@ -74,5 +78,6 @@ const TwContentEditable = tw(ContentEditable)`
   tracking-widest
   rounded-xl
   text-3xl
-  text-blue-900
+  ${twBaseColor("text-$baseColor-900")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;
