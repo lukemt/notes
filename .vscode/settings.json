@@ -7,8 +7,9 @@
     "strings": true // forces VS Code to trigger completions when editing "string" content
   },
   "tailwindCSS.experimental.classRegex": [
-    "tw`([^`]*)", // tw`...`
-    "tw\\.[^`]+`([^`]*)`", // tw.xxx<xxx>`...`
-    "tw\\(.*?\\).*?`([^`]*)" // tw(Component)<xxx>`...`
+    // using semicolons to define the end. This is weird but it works especially with inline functions.
+    "tw`([^;]*)`", // tw`...`;
+    "tw\\.[^`]+`([^;]*)`", // tw.xxx<xxx>`...`;
+    "tw\\(.*?\\).*?`([^;]*)`" // tw(Component)<xxx>`...`;
   ]
 }
