@@ -1,1 +1,1 @@
-export const DEFAULT_COLOR = "green";
+export const DEFAULT_COLOR = "sky";
