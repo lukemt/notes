@@ -1,9 +1,9 @@
 import tw from "tailwind-styled-components";
-import { twBaseColor } from "../../../utils/twIncludeAllColors";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
 
 interface ExpandButtonProps {
   isExpanded: boolean;
-  baseColor?: string;
+  baseColor: TwColor;
   onExpand: () => void;
   onCollapse: () => void;
 }

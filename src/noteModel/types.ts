@@ -1,3 +1,5 @@
+import { TwColor } from "../utils/twIncludeAllColors";
+
 export interface Note {
   _id: string;
   text: string;
@@ -5,5 +7,5 @@ export interface Note {
   isExpanded: boolean;
   needsFocus?: true;
   isPage?: boolean;
-  baseColor?: string;
+  baseColor?: TwColor;
 }

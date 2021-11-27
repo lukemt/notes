@@ -1,8 +1,8 @@
 import { useNavigate } from "react-router-dom";
 import tw from "tailwind-styled-components";
-import { twBaseColor } from "../../../utils/twIncludeAllColors";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
 
-export default function BackButton({ baseColor }: { baseColor?: string }) {
+export default function BackButton({ baseColor }: { baseColor: TwColor }) {
   const navigate = useNavigate();
   return (
     <TwButton onClick={() => navigate(-1)} $baseColor={baseColor}>
@@ -28,6 +28,6 @@ const TwButton = tw.button`
   transition
   ease-out
   hover:scale-125
-  ${twBaseColor("text-$baseColor-900")}
-  ${twBaseColor("dark:text-$baseColor-50")}
+  ${twBaseColor("text-$baseColor-800")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;

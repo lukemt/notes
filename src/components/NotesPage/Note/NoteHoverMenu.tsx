@@ -1,12 +1,15 @@
 import styled from "styled-components";
 import tw from "tailwind-styled-components";
 
-interface NoteMenuProps {
+interface NoteHoverMenuProps {
   isPage: boolean;
   onToggleIsPage: () => void;
 }
 
-export default function NoteMenu({ isPage, onToggleIsPage }: NoteMenuProps) {
+export default function NoteHoverMenu({
+  isPage,
+  onToggleIsPage,
+}: NoteHoverMenuProps) {
   return (
     <TwButton onClick={onToggleIsPage}>
       {isPage ? (

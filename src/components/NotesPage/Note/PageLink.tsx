@@ -1,10 +1,10 @@
 import { Link } from "react-router-dom";
 import tw from "tailwind-styled-components";
-import { twBaseColor } from "../../../utils/twIncludeAllColors";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
 
 interface PageLinkProps {
   to: string;
-  baseColor?: string;
+  baseColor: TwColor;
 }
 
 export default function PageLink({ to, baseColor }: PageLinkProps) {
@@ -26,7 +26,7 @@ export default function PageLink({ to, baseColor }: PageLinkProps) {
   );
 }
 
-const TwLink = tw(Link)<{ $baseColor?: string }>`
+const TwLink = tw(Link)`
     p-3
     transition
     ease-out

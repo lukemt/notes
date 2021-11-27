@@ -1,4 +1,5 @@
 import { nanoid } from "nanoid";
+import { TwColor } from "../utils/twIncludeAllColors";
 import { SubscribableStore } from "./SubscribableStore";
 import { TransactionManager } from "./TransactionManager";
 import { Note } from "./types";
@@ -176,28 +177,29 @@ export class NotesModel {
   }
 
   deleteNote(id: string) {
+    const note = this.getOne(id);
+    if (!note) {
+      throw new Error(`deleteNote: Note with id ${id} not found`);
+    }
+
+    const parentNote = this.getParent(id);
+    if (!parentNote) {
+      throw new Error(`deleteNote: Note with id ${id} not found`);
+    }
+    const previousNoteId = this.getPreviousVisibleNoteId(id);
+
+    // Don't delete the last note
+    if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
+      return;
+    }
+
+    // Don't delete if the note has children
+    if (note.childrenIds.length > 0) {
+      console.warn("Can't delete note with children", id, note);
+      return;
+    }
+
     this.transactionManager.runTransaction((transaction) => {
-      const note = transaction.getOne(id);
-      if (!note) {
-        throw new Error(`deleteNote: Note with id ${id} not found`);
-      }
-
-      const parentNote = this.getParent(id);
-      if (!parentNote) {
-        throw new Error(`deleteNote: Note with id ${id} not found`);
-      }
-      const previousNoteId = this.getPreviousVisibleNoteId(id);
-
-      // Don't delete the last note
-      if (parentNote._id === "ROOT" && parentNote.childrenIds.length === 1) {
-        return this;
-      }
-
-      // Don't delete if the note has children
-      if (note.childrenIds.length > 0) {
-        return this;
-      }
-
       // Remove the reference to the note from the parent note
       transaction.patchOne(parentNote._id, (note) => ({
         childrenIds: note.childrenIds.filter((childId) => childId !== id),
@@ -231,7 +233,7 @@ export class NotesModel {
       }
       const index = parentNote.childrenIds.indexOf(id);
       if (index === 0) {
-        return this;
+        return;
       }
 
       // remove the note from the children array of the parent
@@ -261,7 +263,7 @@ export class NotesModel {
       }
 
       if (parentNote._id === "ROOT") {
-        return this;
+        return;
       }
 
       const grandParentNote = this.getParent(parentNote._id);
@@ -296,7 +298,7 @@ export class NotesModel {
   selectNext(id: string) {
     const nextId = this.getNextVisibleNoteId(id);
     if (!nextId) {
-      return this;
+      return;
     }
     this.notesStore.patchOne(
       nextId,
@@ -310,7 +312,7 @@ export class NotesModel {
   selectPrevious(id: string) {
     const previousId = this.getPreviousVisibleNoteId(id);
     if (!previousId) {
-      return this;
+      return;
     }
     this.notesStore.patchOne(
       previousId,
@@ -342,6 +344,14 @@ export class NotesModel {
       transaction.patchOne(id, (note) => ({
         isPage: !note.isPage,
       }));
+    });
+  }
+
+  setBaseColor(id: string, color: TwColor | undefined) {
+    this.transactionManager.runTransaction((transaction) => {
+      transaction.patchOne(id, {
+        baseColor: color,
+      });
     });
   }
 }

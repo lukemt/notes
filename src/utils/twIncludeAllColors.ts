@@ -1,10 +1,34 @@
 /**
- * TODO: Write some good docs about this
+  TODO: Write some good docs about this
  */
 
-import { DEFAULT_COLOR } from "../config";
+export type TwColor =
+  | "black"
+  | "white"
+  | "rose"
+  | "pink"
+  | "fuchsia"
+  | "purple"
+  | "violet"
+  | "indigo"
+  | "blue"
+  | "sky"
+  | "cyan"
+  | "teal"
+  | "emerald"
+  | "green"
+  | "lime"
+  | "yellow"
+  | "amber"
+  | "orange"
+  | "red"
+  | "warmGray"
+  | "trueGray"
+  | "gray"
+  | "coolGray"
+  | "blueGray";
 
-const allColors = [
+export const allColors: TwColor[] = [
   "black",
   "white",
   "rose",
@@ -46,11 +70,14 @@ const includedTwClasses: string[] = [
   "text-black-600 text-white-600 text-rose-600 text-pink-600 text-fuchsia-600 text-purple-600 text-violet-600 text-indigo-600 text-blue-600 text-sky-600 text-cyan-600 text-teal-600 text-emerald-600 text-green-600 text-lime-600 text-yellow-600 text-amber-600 text-orange-600 text-red-600 text-warmGray-600 text-trueGray-600 text-gray-600 text-coolGray-600 text-blueGray-600",
   "dark:text-black-400 dark:text-white-400 dark:text-rose-400 dark:text-pink-400 dark:text-fuchsia-400 dark:text-purple-400 dark:text-violet-400 dark:text-indigo-400 dark:text-blue-400 dark:text-sky-400 dark:text-cyan-400 dark:text-teal-400 dark:text-emerald-400 dark:text-green-400 dark:text-lime-400 dark:text-yellow-400 dark:text-amber-400 dark:text-orange-400 dark:text-red-400 dark:text-warmGray-400 dark:text-trueGray-400 dark:text-gray-400 dark:text-coolGray-400 dark:text-blueGray-400",
   "dark:text-black-50 dark:text-white-50 dark:text-rose-50 dark:text-pink-50 dark:text-fuchsia-50 dark:text-purple-50 dark:text-violet-50 dark:text-indigo-50 dark:text-blue-50 dark:text-sky-50 dark:text-cyan-50 dark:text-teal-50 dark:text-emerald-50 dark:text-green-50 dark:text-lime-50 dark:text-yellow-50 dark:text-amber-50 dark:text-orange-50 dark:text-red-50 dark:text-warmGray-50 dark:text-trueGray-50 dark:text-gray-50 dark:text-coolGray-50 dark:text-blueGray-50",
+  "dark:ring-black-600 dark:ring-white-600 dark:ring-rose-600 dark:ring-pink-600 dark:ring-fuchsia-600 dark:ring-purple-600 dark:ring-violet-600 dark:ring-indigo-600 dark:ring-blue-600 dark:ring-sky-600 dark:ring-cyan-600 dark:ring-teal-600 dark:ring-emerald-600 dark:ring-green-600 dark:ring-lime-600 dark:ring-yellow-600 dark:ring-amber-600 dark:ring-orange-600 dark:ring-red-600 dark:ring-warmGray-600 dark:ring-trueGray-600 dark:ring-gray-600 dark:ring-coolGray-600 dark:ring-blueGray-600",
+  "focus:ring-black-300 focus:ring-white-300 focus:ring-rose-300 focus:ring-pink-300 focus:ring-fuchsia-300 focus:ring-purple-300 focus:ring-violet-300 focus:ring-indigo-300 focus:ring-blue-300 focus:ring-sky-300 focus:ring-cyan-300 focus:ring-teal-300 focus:ring-emerald-300 focus:ring-green-300 focus:ring-lime-300 focus:ring-yellow-300 focus:ring-amber-300 focus:ring-orange-300 focus:ring-red-300 focus:ring-warmGray-300 focus:ring-trueGray-300 focus:ring-gray-300 focus:ring-coolGray-300 focus:ring-blueGray-300",
+  "text-black-800 text-white-800 text-rose-800 text-pink-800 text-fuchsia-800 text-purple-800 text-violet-800 text-indigo-800 text-blue-800 text-sky-800 text-cyan-800 text-teal-800 text-emerald-800 text-green-800 text-lime-800 text-yellow-800 text-amber-800 text-orange-800 text-red-800 text-warmGray-800 text-trueGray-800 text-gray-800 text-coolGray-800 text-blueGray-800",
 ];
 
 export function twIncludeAllColors(
   strings: TemplateStringsArray,
-  baseColor: string
+  baseColor: TwColor
 ): string {
   const [pre, suf] = strings;
   logMissingClasses(pre, suf);
@@ -59,8 +86,8 @@ export function twIncludeAllColors(
 
 export const twBaseColor =
   (twClassStr: string) =>
-  ({ $baseColor }: { $baseColor?: string }) => {
-    const baseColor = $baseColor ?? DEFAULT_COLOR;
+  ({ $baseColor }: { $baseColor: TwColor }) => {
+    const baseColor = $baseColor;
     const [pre, suf] = twClassStr.split("$baseColor");
     logMissingClasses(pre, suf);
     return pre + baseColor + suf;
