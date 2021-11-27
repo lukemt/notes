@@ -18,7 +18,7 @@ export default function NoteMenu({
   notesModel,
   baseColor,
 }: NoteMenuProps) {
-  const [menuContent, setMenuContent] = useState(
+  const [menuContent, setMenuContent] = useState(() =>
     generateMenuContent(note, notesModel, "")
   );
 
@@ -47,9 +47,13 @@ export default function NoteMenu({
       return item?.label ?? "";
     },
     stateReducer: (state, actionAndChanges) => {
+      // Highlight the Heading (index 0), if the user searches parts of the Heading,
+      // otherwise highlight the first sub-item (index 1)
       console.log("stateReducer", { actionAndChanges, state });
       const { type, changes, inputValue } = actionAndChanges;
       if (type === useCombobox.stateChangeTypes.InputChange) {
+        // Unfortunately we have to gernate the menu content here too
+        // so it's done twice which is not optimal
         const newMenuContent = generateMenuContent(
           note,
           notesModel,
