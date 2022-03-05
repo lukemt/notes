@@ -5,6 +5,7 @@ import { useLocation, useParams } from "react-router-dom";
 import { NotesModel } from "../../noteModel/NotesModel";
 import { NoteHeader } from "./NoteHeader";
 import NotesTree from "./NotesTree";
+import { twBaseColor } from "../../utils/twIncludeAllColors";
 
 interface NotesPageProps {
   notesModel: NotesModel;
@@ -42,7 +43,7 @@ export default function NotesPage({ notesModel }: NotesPageProps) {
         notesModel={notesModel}
         baseColor={baseColor}
       />
-      <TwMain>
+      <TwMain $baseColor={baseColor}>
         <ul>
           {mainNote.childrenIds.map((id) => (
             <NotesTree
@@ -50,6 +51,7 @@ export default function NotesPage({ notesModel }: NotesPageProps) {
               notesModel={notesModel}
               id={id}
               defaultBaseColor={baseColor}
+              parentDesign={null}
             />
           ))}
         </ul>
@@ -59,7 +61,22 @@ export default function NotesPage({ notesModel }: NotesPageProps) {
 }
 
 const TwMain = tw.main`
-  max-w-md
+  max-w-xl
   mx-auto
   my-0
+
+  pl-5
+  py-4
+  pr-3
+
+  overflow-hidden
+  ${twBaseColor("bg-$baseColor-50")}
+  dark:bg-gradient-to-br
+  ${twBaseColor("dark:from-$baseColor-900")}
+  dark:to-gray-800
+  shadow-lg
+  border-2
+  rounded-xl
+  
+  ${twBaseColor("border-$baseColor-200")}
 `;

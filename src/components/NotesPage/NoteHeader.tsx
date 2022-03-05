@@ -17,7 +17,12 @@ export function NoteHeader({
 }) {
   return (
     <TwHeader $baseColor={baseColor}>
-      <Flipped flipId={mainNote._id}>
+      <Flipped
+        flipId={mainNote._id}
+        scale={false}
+        translate={true}
+        opacity={true}
+      >
         <TwFlexDiv $baseColor={baseColor}>
           {mainNote._id !== "ROOT" && <BackButton baseColor={baseColor} />}
           <TwContentEditable
@@ -64,7 +69,7 @@ const TwHeader = tw.header`
 
 const TwFlexDiv = tw.div`
   flex
-  max-w-md
+  max-w-xl
   mx-auto
   p-1
   pl-3
