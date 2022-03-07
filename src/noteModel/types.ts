@@ -6,6 +6,7 @@ export interface Note {
   childrenIds: string[];
   isExpanded: boolean;
   needsFocus?: true;
+  isMenuOpen?: true;
   isPage?: boolean;
   baseColor?: TwColor;
 }

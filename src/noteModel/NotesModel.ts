@@ -354,4 +354,25 @@ export class NotesModel {
       });
     });
   }
+
+  openNoteMenu(id: string) {
+    this.notesStore.patchOne(
+      id,
+      {
+        isMenuOpen: true, // TODO move to memory store
+      },
+      "ui-state"
+    );
+  }
+
+  closeNoteMenu(id: string) {
+    this.notesStore.patchOne(
+      id,
+      {
+        needsFocus: true, // TODO move to memory store
+        isMenuOpen: undefined, // TODO move to memory store
+      },
+      "ui-state"
+    );
+  }
 }
