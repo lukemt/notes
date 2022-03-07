@@ -28,7 +28,7 @@ export default function generateBaseColorSection(
       console.log("onSelect: Color");
     },
     component: ({ highlighted, itemProps }) => (
-      <TwLi $baseColor={"gray"} $highlighted={highlighted} {...itemProps}>
+      <TwLi $baseColor={"black"} $highlighted={highlighted} {...itemProps}>
         Color
       </TwLi>
     ),

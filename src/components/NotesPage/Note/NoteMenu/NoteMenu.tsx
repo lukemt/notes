@@ -150,11 +150,3 @@ const TwSearchInput = tw.input`
 const TwUl = tw.ul`
 
 `;
-
-const TwLi = tw.li<{ $highlighted: boolean }>`
-  py-3
-  px-5
-  cursor-pointer
-${({ $highlighted }) =>
-  $highlighted ? `bg-gray-300 dark:bg-gray-700` : null}}}
-`;
