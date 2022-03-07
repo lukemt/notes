@@ -48,6 +48,12 @@ export default function NoteMenu({
         selectedItem.onSelect();
       }
     },
+    onIsOpenChange: () => {
+      console.log("NoteMenu Closing note menu (onBlur)");
+      if (isOpen) {
+        notesModel.closeNoteMenu(note._id);
+      }
+    },
     itemToString: (item) => {
       return item?.label ?? "";
     },
@@ -87,11 +93,7 @@ export default function NoteMenu({
       <TwLabel {...getLabelProps()}>Do something with the note:</TwLabel>
       <TwComboboxDiv {...getComboboxProps()}>
         <TwSearchInput
-          {...getInputProps({
-            onBlur: () => {
-              notesModel.closeNoteMenu(note._id);
-            },
-          })}
+          {...getInputProps()}
           placeholder="Search..."
           $baseColor={baseColor}
         />
@@ -99,13 +101,11 @@ export default function NoteMenu({
       <TwUl {...getMenuProps()}>
         {isOpen &&
           menuContent.menuItems.map((item) => (
-            <TwLi
-              $highlighted={highlightedIndex === item.index}
+            <item.component
+              highlighted={highlightedIndex === item.index}
               key={`${item.label}${item.index}`}
-              {...getItemProps({ item, index: item.index })}
-            >
-              {item.component}
-            </TwLi>
+              itemProps={getItemProps({ item, index: item.index })}
+            />
           ))}
       </TwUl>
     </TwNoteMenuDiv>
