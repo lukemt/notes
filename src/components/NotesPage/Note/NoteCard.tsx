@@ -53,6 +53,7 @@ export default function NoteCard({
           onSelectNext={() => notesModel.selectNext(note._id)}
           onExpand={() => notesModel.expandNote(note._id)}
           onCollapse={() => notesModel.collapseNote(note._id)}
+          onNoteMenuTrigger={() => notesModel.openNoteMenu(note._id)}
         />
         {note.childrenIds.length > 0 && (
           <ExpandButton
@@ -63,7 +64,9 @@ export default function NoteCard({
           />
         )}
       </TwNoteCardDiv>
-      <NoteMenu note={note} notesModel={notesModel} baseColor={baseColor} />
+      {note.isMenuOpen && (
+        <NoteMenu note={note} notesModel={notesModel} baseColor={baseColor} />
+      )}
     </>
   );
 }

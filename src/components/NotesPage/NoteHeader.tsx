@@ -43,6 +43,7 @@ export function NoteHeader({
             onSelectNext={() => {}}
             onExpand={() => {}}
             onCollapse={() => {}}
+            onNoteMenuTrigger={() => {}}
           />
         </TwFlexDiv>
       </Flipped>

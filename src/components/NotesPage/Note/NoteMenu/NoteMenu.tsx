@@ -35,7 +35,12 @@ export default function NoteMenu({
     // defaultHighlightedIndex: 0,
     items: menuContent.menuItems,
     onInputValueChange: ({ inputValue }) => {
-      setMenuContent(generateMenuContent(note, notesModel, inputValue ?? ""));
+      if (inputValue === "#") {
+        notesModel.updateNoteText(note._id, note.text + "#");
+        notesModel.closeNoteMenu(note._id);
+      } else {
+        setMenuContent(generateMenuContent(note, notesModel, inputValue ?? ""));
+      }
     },
     onSelectedItemChange: ({ selectedItem, type }) => {
       console.log("selectedItem", type, selectedItem);
@@ -82,7 +87,11 @@ export default function NoteMenu({
       <TwLabel {...getLabelProps()}>Do something with the note:</TwLabel>
       <TwComboboxDiv {...getComboboxProps()}>
         <TwSearchInput
-          {...getInputProps()}
+          {...getInputProps({
+            onBlur: () => {
+              notesModel.closeNoteMenu(note._id);
+            },
+          })}
           placeholder="Search..."
           $baseColor={baseColor}
         />

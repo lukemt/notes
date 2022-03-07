@@ -27,6 +27,7 @@ export default function generateBaseColorSection(
       onSelect: () => {
         console.log("base color changed to " + color);
         notesModel.setBaseColor(note._id, color);
+        notesModel.closeNoteMenu(note._id);
       },
       component: <div>{color}</div>,
     })),

@@ -15,6 +15,7 @@ interface ContentEditableProps {
   onSelectNext: () => void;
   onExpand: () => void;
   onCollapse: () => void;
+  onNoteMenuTrigger: () => void;
 }
 
 export default function ContentEditable({
@@ -30,6 +31,7 @@ export default function ContentEditable({
   onSelectNext,
   onExpand,
   onCollapse,
+  onNoteMenuTrigger,
   className,
 }: ContentEditableProps) {
   const ref = useRef<HTMLDivElement>(null);
@@ -170,6 +172,12 @@ export default function ContentEditable({
         } else {
           onSelectNext();
         }
+        break;
+      }
+
+      case "#": {
+        e.preventDefault();
+        onNoteMenuTrigger();
         break;
       }
     }
