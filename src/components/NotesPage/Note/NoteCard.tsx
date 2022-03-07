@@ -1,41 +1,46 @@
 import tw from "tailwind-styled-components";
-import { Flipped } from "react-flip-toolkit";
 import ContentEditable from "./ContentEditable";
 import ExpandButton from "./ExpandButton";
 import PageLink from "./PageLink";
-import NoteMenu from "./NoteMenu";
+import NoteHoverMenu from "./NoteHoverMenu";
+import NoteMenu from "./NoteMenu/NoteMenu";
 import { Note } from "../../../noteModel/types";
 import { NotesModel } from "../../../noteModel/NotesModel";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
+
+type Design = "card" | "boxes" | null;
 
 interface NoteCardProps {
   note: Note;
   notesModel: NotesModel;
+  baseColor: TwColor;
+  design: Design; // TODO: move to notesModel
 }
 
-export default function NoteCard({ note, notesModel }: NoteCardProps) {
+export default function NoteCard({
+  note,
+  notesModel,
+  baseColor,
+  design,
+}: NoteCardProps) {
   return (
-    <Flipped
-      flipId={note._id}
-      onAppear={(element) => {
-        element.animate([{ opacity: 0 }, { opacity: 1 }], {
-          duration: 500,
-          fill: "forwards",
-        });
-      }}
-    >
+    <>
       <TwNoteCardDiv
-        hasHiddenChildren={!note.isExpanded && note.childrenIds.length > 0}
+        $hasHiddenChildren={!note.isExpanded && note.childrenIds.length > 0}
+        $baseColor={baseColor}
+        $design={design}
       >
-        <NoteMenu
+        <NoteHoverMenu
           isPage={note.isPage ?? false}
           onToggleIsPage={() => notesModel.toggleIsPage(note._id)}
         />
         {note.isPage ? (
-          <PageLink to={`/note/${note._id}`} />
+          <PageLink to={`/note/${note._id}`} baseColor={baseColor} />
         ) : (
           <div className="w-5" />
         )}
         <TwContentEditable
+          $baseColor={baseColor}
           defaultValue={note.text}
           needsFocus={note.needsFocus}
           onNewValue={(value) => notesModel.updateNoteText(note._id, value)}
@@ -48,41 +53,62 @@ export default function NoteCard({ note, notesModel }: NoteCardProps) {
           onSelectNext={() => notesModel.selectNext(note._id)}
           onExpand={() => notesModel.expandNote(note._id)}
           onCollapse={() => notesModel.collapseNote(note._id)}
+          onNoteMenuTrigger={() => notesModel.openNoteMenu(note._id)}
         />
         {note.childrenIds.length > 0 && (
           <ExpandButton
             isExpanded={note.isExpanded}
+            baseColor={baseColor}
             onExpand={() => notesModel.expandNote(note._id)}
             onCollapse={() => notesModel.collapseNote(note._id)}
           />
         )}
       </TwNoteCardDiv>
-    </Flipped>
+      {note.isMenuOpen && (
+        <NoteMenu note={note} notesModel={notesModel} baseColor={baseColor} />
+      )}
+    </>
   );
 }
 
-const TwNoteCardDiv = tw.div<{ hasHiddenChildren: boolean }>`
-          flex
-          items-center
-          relative
-          m-3
-      
-          group
-          focus-within:ring-2
-          ring-blue-600
-          
-          rounded-xl
-          shadow-lg
-          bg-gradient-to-br
-          from-white
-          to-blue-50
-          dark:from-blue-900
-          dark:to-green-800
+const TwNoteCardDiv = tw.div`
+  flex
+  items-center
+  relative
 
-          ${({ hasHiddenChildren }) =>
-            hasHiddenChildren
-              ? "border-l-4 border-blue-700 dark:border-green-600"
-              : ""}
+  group
+  focus-within:ring-2
+  ${twBaseColor("ring-$baseColor-600")}
+  ${twBaseColor("dark:ring-$baseColor-600")}
+  
+  rounded-xl
+
+  ${({
+    $hasHiddenChildren,
+    $design,
+    $baseColor,
+  }: {
+    $hasHiddenChildren: boolean;
+    $design: Design;
+    $baseColor: TwColor;
+  }) =>
+    $design === "boxes"
+      ? `
+  m-3
+        shadow-lg
+        bg-gradient-to-br
+        from-white
+        ${twBaseColor("to-$baseColor-50")({ $baseColor })}
+        ${twBaseColor("dark:from-$baseColor-900")({ $baseColor })}
+        dark:to-gray-800
+        `
+      : $hasHiddenChildren
+      ? `
+        border-l-4
+        ${twBaseColor("border-$baseColor-700")({ $baseColor })}
+        ${twBaseColor("dark:border-$baseColor-400")({ $baseColor })}
+      `
+      : ""}
 `;
 
 const TwContentEditable = tw(ContentEditable)`
@@ -90,4 +116,6 @@ const TwContentEditable = tw(ContentEditable)`
   py-3
   outline-none
   tracking-wide
+  ${twBaseColor("text-$baseColor-800")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;

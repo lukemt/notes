@@ -1,19 +1,22 @@
 import tw from "tailwind-styled-components";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
 
 interface ExpandButtonProps {
   isExpanded: boolean;
+  baseColor: TwColor;
   onExpand: () => void;
   onCollapse: () => void;
 }
 
 export default function ExpandButton({
   isExpanded,
+  baseColor,
   onExpand,
   onCollapse,
 }: ExpandButtonProps) {
   if (isExpanded) {
     return (
-      <TwCollapseButton onClick={onCollapse}>
+      <TwCollapseButton onClick={onCollapse} $baseColor={baseColor}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4"
@@ -33,7 +36,7 @@ export default function ExpandButton({
     );
   } else {
     return (
-      <TwExpandButton onClick={onExpand}>
+      <TwExpandButton onClick={onExpand} $baseColor={baseColor}>
         <svg
           xmlns="http://www.w3.org/2000/svg"
           className="h-4 w-4"
@@ -59,7 +62,8 @@ const TwCollapseButton = tw.button`
   opacity-0
   group-hover:opacity-100
   transition
-  text-gray-600
+  ${twBaseColor("text-$baseColor-600")}
+  ${twBaseColor("dark:text-$baseColor-400")}
 `;
 
 const TwExpandButton = tw.button`
@@ -68,5 +72,6 @@ const TwExpandButton = tw.button`
   group-hover:opacity-100
   group-focus:opacity-100
   transition
-  text-gray-600
+  ${twBaseColor("text-$baseColor-600")}
+  ${twBaseColor("dark:text-$baseColor-400")}
 `;

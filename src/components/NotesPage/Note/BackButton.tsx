@@ -1,10 +1,11 @@
 import { useNavigate } from "react-router-dom";
 import tw from "tailwind-styled-components";
+import { twBaseColor, TwColor } from "../../../utils/twIncludeAllColors";
 
-export default function BackButton() {
+export default function BackButton({ baseColor }: { baseColor: TwColor }) {
   const navigate = useNavigate();
   return (
-    <TwButton onClick={() => navigate(-1)}>
+    <TwButton onClick={() => navigate(-1)} $baseColor={baseColor}>
       <svg
         xmlns="http://www.w3.org/2000/svg"
         className="h-6 w-6"
@@ -27,6 +28,6 @@ const TwButton = tw.button`
   transition
   ease-out
   hover:scale-125
-  text-blue-900
-  dark:text-blue-50
+  ${twBaseColor("text-$baseColor-800")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;

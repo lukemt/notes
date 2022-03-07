@@ -1,5 +1,5 @@
 {
-  "name": "my-new-app",
+  "name": "notes",
   "version": "0.1.0",
   "private": true,
   "dependencies": {
@@ -12,6 +12,7 @@
     "@types/node": "^12.20.33",
     "@types/react": "^17.0.30",
     "@types/react-dom": "^17.0.9",
+    "downshift": "^6.1.7",
     "history": "^5.1.0",
     "lodash": "^4.17.21",
     "nanoid": "^3.1.30",

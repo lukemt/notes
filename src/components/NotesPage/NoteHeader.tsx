@@ -4,20 +4,29 @@ import { NotesModel } from "../../noteModel/NotesModel";
 import { Note } from "../../noteModel/types";
 import BackButton from "./Note/BackButton";
 import ContentEditable from "./Note/ContentEditable";
+import { twBaseColor, TwColor } from "../../utils/twIncludeAllColors";
 
 export function NoteHeader({
   mainNote,
   notesModel,
+  baseColor,
 }: {
   mainNote: Note;
   notesModel: NotesModel;
+  baseColor: TwColor;
 }) {
   return (
-    <TwHeader>
-      <Flipped flipId={mainNote._id}>
-        <TwFlexDiv>
-          {mainNote._id !== "ROOT" && <BackButton />}
+    <TwHeader $baseColor={baseColor}>
+      <Flipped
+        flipId={mainNote._id}
+        scale={false}
+        translate={true}
+        opacity={true}
+      >
+        <TwFlexDiv $baseColor={baseColor}>
+          {mainNote._id !== "ROOT" && <BackButton baseColor={baseColor} />}
           <TwContentEditable
+            $baseColor={baseColor}
             defaultValue={mainNote.text}
             needsFocus={false}
             onNewValue={(value) =>
@@ -34,6 +43,7 @@ export function NoteHeader({
             onSelectNext={() => {}}
             onExpand={() => {}}
             onCollapse={() => {}}
+            onNoteMenuTrigger={() => {}}
           />
         </TwFlexDiv>
       </Flipped>
@@ -41,12 +51,12 @@ export function NoteHeader({
   );
 }
 
-const background = () => `
+const background = ({ $baseColor }: { $baseColor: TwColor }) => `
   bg-gradient-to-br
   from-white
-  to-blue-50
+  ${twBaseColor("to-$baseColor-50")({ $baseColor })}
   dark:from-gray-900
-  dark:to-blue-900
+  ${twBaseColor("dark:to-$baseColor-900")({ $baseColor })}
 `;
 
 const TwHeader = tw.header`
@@ -60,7 +70,7 @@ const TwHeader = tw.header`
 
 const TwFlexDiv = tw.div`
   flex
-  max-w-md
+  max-w-xl
   mx-auto
   p-1
   pl-3
@@ -74,5 +84,6 @@ const TwContentEditable = tw(ContentEditable)`
   tracking-widest
   rounded-xl
   text-3xl
-  text-blue-900
+  ${twBaseColor("text-$baseColor-800")}
+  ${twBaseColor("dark:text-$baseColor-100")}
 `;
